@@ -9,3 +9,5 @@ compiler/**/*.js
 compiler/node_modules
 compiler/package-lock.json
 wasmout/
+.idea/*
+cout/

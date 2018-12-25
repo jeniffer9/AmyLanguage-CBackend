@@ -4,7 +4,7 @@ import utils._
 import ast._
 import parsing._
 import analyzer._
-import codegen._
+import codegenC._
 
 import java.io.File
 
@@ -20,8 +20,8 @@ object Main extends MainHelpers {
       Parser andThen
       NameAnalyzer andThen
       TypeChecker andThen
-      CodeGen andThen
-      CodePrinter
+      CodeGenC andThen
+      CodePrinterC
 
     val files = ctx.files.map(new File(_))
 
