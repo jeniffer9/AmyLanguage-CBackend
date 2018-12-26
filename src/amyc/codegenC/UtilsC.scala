@@ -2,13 +2,13 @@ package amyc
 package codegenC
 
 import ast.Identifier
-import c.Function
+import c.{Function, Parameter}
 import c.Instructions._
-
 import ast.SymbolicTreeModule._
 
+import scala.language.implicitConversions
 // Utilities for CodeGen
-object Utils {
+object UtilsC {
 
   trait CType
   case object CStringType extends CType {
@@ -65,9 +65,11 @@ object Utils {
 
   // Built-in implementation of concatenation
   val concatImpl: Function = {
-    Function("concat", 2, false, CStringType) { lh =>
+    val param1 = new Parameter("s1", CStringType, true)
+    val param2 = new Parameter("s2", CStringType, true)
+    Function("concat", List(param1, param2), CStringType)({
       Const(12)
-    }
+    })
   }
 
   //val digitToStringImpl: Function = ???
@@ -75,5 +77,12 @@ object Utils {
   //val readStringImpl: Function = ???
 
   val cFunctions = List(concatImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
+
+  implicit def toCArgs(args: List[ParamDef]) = args.map(a => new Parameter(a.name, a.tt.tpe))
+  implicit def i2s(i: Name): String = i.name
+  implicit def toCType(tpe: Type): CType = tpe match {
+    case IntType => CIntType
+    case _ => CStringType
+  }
 
 }

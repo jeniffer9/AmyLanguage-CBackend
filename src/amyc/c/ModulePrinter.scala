@@ -23,7 +23,7 @@ object ModulePrinter {
     val paramsDoc: Document = if (fh.args == 0) "" else {
       Lined(List(
         "(",
-        Lined(List.fill(fh.args)(Raw("I'm a para")), " "),
+        Lined(fh.args.map(mkParam), ", "),
         ") "
       ))
     }
@@ -34,6 +34,12 @@ object ModulePrinter {
       Indented(Stacked(mkCode(fh.code))),
       "}"
     )
+  }
+
+  private def mkParam(param: Parameter): Document = {
+    val tpe = param.tpe.toString
+    val const = if (param.const) "const " else ""
+    Raw(const ++ tpe ++ " " ++ param.name)
   }
 
   private def mkCode(code: Code): List[Document] = code.instructions match {

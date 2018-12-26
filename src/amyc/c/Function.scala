@@ -2,26 +2,21 @@ package amyc
 package c
 
 import Instructions.Code
-import codegenC.Utils._
+import codegenC.UtilsC._
+import ast.SymbolicTreeModule._
 
-class Function private (val name: String, val args: Int, val retType: CType, val locals: Int, val code: Code) {
+import scala.language.implicitConversions
+
+class Function private (val name: String, val args: List[Parameter], val retType: CType, val code: Code) {
   override def toString: String = ModulePrinter(this)
 }
 
-class LocalsHandler(args: Int) {
-  private var locals_ = 0
-  def getFreshLocal(): Int = {
-    locals_ += 1
-    args + locals_ - 1
-  }
-  private[c] def locals = locals_
-}
+class Parameter (val name: String, val tpe: CType, val const: Boolean = false)
 
 object Function {
-  def apply(name: String, args: Int, retType: CType = CIntType)(codeGen: LocalsHandler => Code) = {
-    val lh = new LocalsHandler(args)
-    // Make code first, as it may increment the locals in lh
-    val code = codeGen(lh)
-    new Function(name, args, retType, lh.locals, code)
+  def apply(name: String, args: List[Parameter], retType: CType = CIntType)(codeGen: Code) = {
+    new Function(name, args, retType, codeGen)
   }
 }
+
+
