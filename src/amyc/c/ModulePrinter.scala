@@ -45,6 +45,7 @@ object ModulePrinter {
   private def mkCode(code: Code): List[Document] = code.instructions match {
     case Nil => Nil
     case h :: t => h match {
+
       case Else =>
         Unindented(mkInstr(h)) ::
         mkCode(t)
@@ -54,9 +55,10 @@ object ModulePrinter {
       case If_void | If_i32 | Block(_) | Loop(_) =>
         mkInstr(h) ::
         (mkCode(t) map Indented)
-      case Call(_, params) =>
-        val parameters = params.map(d => Lined(mkCode(d), ", "))
-        Lined(mkInstr(h) :: Raw("(") :: parameters  ::: List(Raw(")"))) ::
+      case Call(_, params, semcol) =>
+        val parameters = params.map(mkCode).map(d => Lined(d))
+        val semCol: List[Document] = if (semcol) List(mkInstr(SemCol)) else List("")
+        Lined(mkInstr(h) :: Raw("(") :: Lined(parameters, ", ") :: List(Raw(")")) ::: semCol) ::
         mkCode(t)
       case SetLocal(_, _, value, _) =>
         Lined(mkInstr(h) :: mkCode(value) ::: List(mkInstr(SemCol))) ::
@@ -95,7 +97,7 @@ object ModulePrinter {
     case Br(label)=> s"br $$$label"
     case Return => "ret"
     case End => "end"
-    case Call(name, _) => name
+    case Call(name, _, _) => name
     case Unreachable => "unreachable"
     case GetLocal(name) => name
     case SetLocal(name, tpe, _, constant) =>

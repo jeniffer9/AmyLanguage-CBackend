@@ -67,16 +67,21 @@ object UtilsC {
     val param2 = new Parameter("s2", CStringType, true)
     Function("concat", List(param1, param2), CStringType)({
 
-      val strLenCall1 = Call("strlen", List(Strng(param1.name)))
-      val strLenCall2 = Call("strlen", List(Strng(param2.name)))
+      val strLenCall1 = Call("strlen", List(param1.name))
+      val strLenCall2 = Call("strlen", List(param2.name))
 
       val local1 = "len1"
       val local2 = "len2"
-      val allocateMem = AllocateMem(Add(Strng(local1), Add(Strng(local2), Const(1))))
+      val local3 = "result"
+      val allocateMem = AllocateMem(Add(local1, Add(local2, Const(1))))
+
+      val memCpyCall1 = Call("memcpy", List(local3, param1.name, local1), true)
+      val memCpyCall2 = Call("memcpy", List(Add(local3, local1), param2.name, Add(local2, Const(1))), true)
 
       SetLocal(local1, CSizeT, strLenCall1, true) <:>
       SetLocal(local2, CSizeT, strLenCall2, true) <:>
-      SetLocal("result", CStringType, allocateMem)
+      SetLocal(local3, CStringType, allocateMem) <:>
+      memCpyCall1 <:> memCpyCall2
 
     })
   }
@@ -87,11 +92,12 @@ object UtilsC {
 
   val cFunctions = List(concatImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
 
-  implicit def toCArgs(args: List[ParamDef]) = args.map(a => new Parameter(a.name, a.tt.tpe))
+  implicit def toCArgs(args: List[ParamDef]): List[Parameter] = args.map(a => new Parameter(a.name, a.tt.tpe))
   implicit def i2s(i: Name): String = i.name
   implicit def toCType(tpe: Type): CType = tpe match {
     case IntType => CIntType
     case _ => CStringType
   }
+  implicit def s2is(s: String): Code = Strng(s)
 
 }
