@@ -1,5 +1,7 @@
 package amyc.c
 
+import amyc.codegenC.UtilsC.CType
+
 import scala.language.implicitConversions
 
 // A subset of instructions defined by the WASM standard
@@ -8,21 +10,27 @@ object Instructions {
 
   // Load an int32 constant to the stack
   case class Const(value: Int) extends Instruction
+  case class Strng(s: String) extends Instruction
+
+  trait Infix extends Instruction {
+    val lhs: Code
+    val rhs: Code
+  }
 
   // Numeric/logical instructions (all take i32 operands)
-  case object Add  extends Instruction
-  case object Sub  extends Instruction
-  case object Mul  extends Instruction
-  case object Div  extends Instruction
-  case object Rem  extends Instruction
-  case object And  extends Instruction
-  case object Or   extends Instruction
+  case class Add(lhs: Code, rhs: Code) extends Infix
+  case class Sub(lhs: Code, rhs: Code) extends Infix
+  case class Mul(lhs: Code, rhs: Code) extends Infix
+  case class Div(lhs: Code, rhs: Code) extends Infix
+  case class Rem(lhs: Code, rhs: Code) extends Infix
+  case class And(lhs: Code, rhs: Code) extends Infix
+  case class Or(lhs: Code, rhs: Code) extends Infix
   case object Eqz  extends Instruction // Return 1 if operand is 0, 0 otherwise
-  case object Lt_s extends Instruction // Signed less-than
-  case object Le_s extends Instruction // Signed less-equals
-  case object Eq   extends Instruction
+  case class Lt_s(lhs: Code, rhs: Code) extends Infix // Signed less-than
+  case class Le_s(lhs: Code, rhs: Code) extends Infix // Signed less-equals
+  case class Eq(lhs: Code, rhs: Code) extends Infix
   case object Drop extends Instruction // Drops the top value of the stack
-  case class Strng(s: String) extends Instruction
+  case object SemCol extends Instruction
 
   // Control instructions
   case object If_void extends Instruction // Marks the beginning of an if-block (with implicit 'then').
@@ -32,13 +40,14 @@ object Instructions {
   case class Loop(label: String)  extends Instruction // A block of instructions with a label at the beginning
   case class Block(label: String) extends Instruction // A block of instructions with a label at the end
   case class Br(label: String)    extends Instruction // Jump to "label", which MUST be the label of an enclosing structure
-  case class Call(name: String)   extends Instruction
+  case class Call(name: String, params: List[Code])   extends Instruction
   case object Return              extends Instruction
   case object Unreachable         extends Instruction // Always fails the program
 
   // Locals (parameters, local variables)
-  case class GetLocal(index: Int) extends Instruction
-  case class SetLocal(index: Int) extends Instruction
+  case class GetLocal(name: String) extends Instruction
+  case class SetLocal(name: String, tpe: CType, value: Code, const: Boolean = false) extends Instruction
+  case class AllocateMem(size: Code) extends Instruction
 
   // Global variables
   case class GetGlobal(index: Int) extends Instruction

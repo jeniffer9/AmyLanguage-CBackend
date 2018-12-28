@@ -3,7 +3,7 @@ package codegenC
 
 import ast.Identifier
 import c.{Function, Parameter}
-import c.Instructions._
+import c.Instructions.{Call, _}
 import ast.SymbolicTreeModule._
 
 import scala.language.implicitConversions
@@ -16,6 +16,9 @@ object UtilsC {
   }
   case object CIntType extends CType {
     override def toString: String = "int"
+  }
+  case object CSizeT extends CType {
+    override def toString: String = "size_t"
   }
 
   val memoryBoundary = 0
@@ -47,12 +50,7 @@ object UtilsC {
   // will point at its field in index (and consume the ADT).
   // 'index' MUST be 0-based.
   def adtField(index: Int): Code = {
-    Const(4* (index + 1)) <:> Add
-  }
-
-  // Increment a local variable
-  def incr(local: Int): Code = {
-    GetLocal(local) <:> Const(1) <:> Add <:> SetLocal(local)
+    Const(4* (index + 1))
   }
 
   // A fresh label name
@@ -68,7 +66,18 @@ object UtilsC {
     val param1 = new Parameter("s1", CStringType, true)
     val param2 = new Parameter("s2", CStringType, true)
     Function("concat", List(param1, param2), CStringType)({
-      Const(12)
+
+      val strLenCall1 = Call("strlen", List(Strng(param1.name)))
+      val strLenCall2 = Call("strlen", List(Strng(param2.name)))
+
+      val local1 = "len1"
+      val local2 = "len2"
+      val allocateMem = AllocateMem(Add(Strng(local1), Add(Strng(local2), Const(1))))
+
+      SetLocal(local1, CSizeT, strLenCall1, true) <:>
+      SetLocal(local2, CSizeT, strLenCall2, true) <:>
+      SetLocal("result", CStringType, allocateMem)
+
     })
   }
 

@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="63e5b2b3-c749-4788-b7e5-cc827a182d89" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/modules/amyc-build.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/amyc-build.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/amyc.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/amyc.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/amyc/c/Function.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/amyc/c/Function.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/amyc/c/Instructions.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/amyc/c/Instructions.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/amyc/c/ModulePrinter.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/amyc/c/ModulePrinter.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/amyc/codegenC/CodeGenC.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/amyc/codegenC/CodeGenC.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/amyc/codegenC/UtilsC.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/amyc/codegenC/UtilsC.scala" afterDir="false" />
@@ -27,31 +24,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/amyc/wasm/Instructions.scala">
+        <entry file="file://$PROJECT_DIR$/src/amyc/ast/TreeModule.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="560">
-              <caret line="65" column="22" selection-start-line="64" selection-start-column="2" selection-end-line="65" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/amyc/utils/Position.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="320">
-              <caret line="48" column="6" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/UtilsC.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="41" selection-start-line="8" selection-start-column="41" selection-end-line="8" selection-end-column="41" />
-              <folding>
-                <element signature="e#31#52#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="-136">
+              <caret line="86" column="16" lean-forward="true" selection-start-line="86" selection-start-column="16" selection-end-line="86" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -59,8 +35,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/CodeGenC.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="11" column="41" selection-start-line="11" selection-start-column="41" selection-end-line="11" selection-end-column="41" />
+            <state relative-caret-position="311">
+              <caret line="80" column="36" lean-forward="true" selection-start-line="80" selection-start-column="36" selection-end-line="80" selection-end-column="36" />
               <folding>
                 <element signature="e#31#48#0" expanded="true" />
               </folding>
@@ -69,12 +45,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/amyc/codegen/CodeGen.scala">
+        <entry file="file://$PROJECT_DIR$/src/amyc/c/Function.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="271">
-              <caret line="37" column="53" lean-forward="true" selection-start-line="37" selection-start-column="8" selection-end-line="37" selection-end-column="53" />
+            <state relative-caret-position="315">
+              <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
               <folding>
-                <element signature="e#30#47#0" expanded="true" />
+                <element signature="e#24#48#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -93,21 +69,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/amyc/c/Module.scala">
+        <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/UtilsC.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="12" column="3" selection-start-line="12" selection-start-column="3" selection-end-line="12" selection-end-column="3" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/amyc/c/Function.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
+            <state relative-caret-position="-123">
+              <caret line="52" column="25" selection-start-line="52" selection-start-column="25" selection-end-line="52" selection-end-column="25" />
               <folding>
-                <element signature="e#24#48#0" expanded="true" />
+                <element signature="e#31#52#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -116,8 +83,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/amyc/c/ModulePrinter.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="321">
-              <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
+            <state relative-caret-position="219">
+              <caret line="87" column="17" selection-start-line="87" selection-start-column="17" selection-end-line="87" selection-end-column="17" />
               <folding>
                 <element signature="e#16#57#0" expanded="true" />
               </folding>
@@ -126,10 +93,13 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/amyc/utils/Document.scala">
+        <entry file="file://$PROJECT_DIR$/src/amyc/c/Instructions.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="353">
-              <caret line="46" column="7" selection-start-line="46" selection-start-column="7" selection-end-line="46" selection-end-column="7" />
+            <state relative-caret-position="308">
+              <caret line="30" column="45" selection-start-line="30" selection-start-column="45" selection-end-line="30" selection-end-column="45" />
+              <folding>
+                <element signature="e#16#49#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -148,7 +118,6 @@
       <find>Liter</find>
       <find>Code</find>
       <find>Case</find>
-      <find>Call</find>
       <find>er</find>
       <find>fundef</find>
       <find>let</find>
@@ -166,7 +135,14 @@
       <find>defaultInclu</find>
       <find>IntT</find>
       <find>implicit</find>
+      <find>global</find>
       <find>Ite</find>
+      <find>local</find>
+      <find>Seq</find>
+      <find>Call</find>
+      <find>Strn</find>
+      <find>Let</find>
+      <find>Add</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -186,14 +162,16 @@
         <option value="$PROJECT_DIR$/src/amyc/codegen/CodeGenC.scala" />
         <option value="$PROJECT_DIR$/src/amyc/codegen/UtilsC.scala" />
         <option value="$PROJECT_DIR$/src/amyc/codegen/CodeGen.scala" />
-        <option value="$PROJECT_DIR$/src/amyc/c/Instructions.scala" />
         <option value="$PROJECT_DIR$/src/amyc/codegenC/CodePrinterC.scala" />
         <option value="$PROJECT_DIR$/src/amyc/Main.scala" />
         <option value="$PROJECT_DIR$/src/amyc/c/Module.scala" />
         <option value="$PROJECT_DIR$/src/amyc/wasm/Function.scala" />
-        <option value="$PROJECT_DIR$/src/amyc/codegenC/CodeGenC.scala" />
         <option value="$PROJECT_DIR$/src/amyc/c/Function.scala" />
+        <option value="$PROJECT_DIR$/src/amyc/wasm/Instructions.scala" />
+        <option value="$PROJECT_DIR$/src/amyc/interpreter/Interpreter.scala" />
         <option value="$PROJECT_DIR$/src/amyc/codegenC/UtilsC.scala" />
+        <option value="$PROJECT_DIR$/src/amyc/c/Instructions.scala" />
+        <option value="$PROJECT_DIR$/src/amyc/codegenC/CodeGenC.scala" />
         <option value="$PROJECT_DIR$/src/amyc/c/ModulePrinter.scala" />
       </list>
     </option>
@@ -262,6 +240,13 @@
               <item name="AmyLanguage-CBackend" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="amyc" type="462c0819:PsiDirectoryNode" />
+              <item name="interpreter" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="amyc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="AmyLanguage-CBackend" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="amyc" type="462c0819:PsiDirectoryNode" />
               <item name="wasm" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -273,7 +258,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545850457664" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545961060226" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path" value="$USER_HOME$/.nvm/versions/node/v8.9.4/bin/node" />
     <property name="settings.editor.selected.configurable" value="configurable.group.language" />
@@ -402,7 +387,7 @@
       <workItem from="1544461711223" duration="1344000" />
       <workItem from="1544602058350" duration="4648000" />
       <workItem from="1544953627219" duration="28665000" />
-      <workItem from="1545658206686" duration="25788000" />
+      <workItem from="1545658206686" duration="38119000" />
     </task>
     <servers />
   </component>
@@ -410,13 +395,15 @@
     <history-entry file="amyc_test_in_amyc - 2018.12.18 at 21h 28m 42s.xml">
       <configuration name="amyc.test in amyc" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="amyc_test_in_amyc - 2018.12.26 at 21h 09m 50s.xml">
+      <configuration name="amyc.test in amyc" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="60445000" />
+    <option name="totallyTimeSpent" value="72776000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="35" y="23" width="1416" height="834" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.109898105" />
       <window_info id="Structure" order="1" weight="0.25" />
@@ -455,7 +442,7 @@
       <window_info anchor="right" id="sbt" order="12" />
     </layout>
     <layout-to-restore>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.109898105" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.109898105" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -472,7 +459,7 @@
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32884097" />
-      <window_info anchor="bottom" id="sbt-shell-toolwindow" order="10" visible="true" weight="0.32884097" />
+      <window_info active="true" anchor="bottom" id="sbt-shell-toolwindow" order="10" visible="true" weight="0.32884097" />
       <window_info anchor="bottom" id="Build" order="11" weight="0.32884097" />
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="13" />
@@ -589,13 +576,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/amyc/c/Instructions.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="24" column="49" lean-forward="true" selection-start-line="24" selection-start-column="49" selection-end-line="24" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/amyc/wasm/Module.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
@@ -610,16 +590,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/amyc/wasm/ModulePrinter.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="7" column="7" selection-start-line="7" selection-start-column="7" selection-end-line="7" selection-end-column="7" />
-          <folding>
-            <element signature="e#19#60#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/amyc/codegen/Utils.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="61">
@@ -627,13 +597,6 @@
           <folding>
             <element signature="e#30#51#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/amyc/ast/TreeModule.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="86" column="16" lean-forward="true" selection-start-line="86" selection-start-column="16" selection-end-line="86" selection-end-column="16" />
         </state>
       </provider>
     </entry>
@@ -651,16 +614,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/CodePrinterC.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" column="27" selection-start-line="19" selection-start-column="27" selection-end-line="19" selection-end-column="27" />
-          <folding>
-            <element signature="e#23#57#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/amyc/utils/Position.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="320">
@@ -668,10 +621,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/amyc/wasm/Instructions.scala">
+    <entry file="file://$PROJECT_DIR$/src/amyc/wasm/ModulePrinter.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="560">
-          <caret line="65" column="22" selection-start-line="64" selection-start-column="2" selection-end-line="65" selection-end-column="22" />
+        <state relative-caret-position="-94">
+          <caret line="14" column="47" lean-forward="true" selection-start-line="14" selection-start-column="47" selection-end-line="14" selection-end-column="47" />
+          <folding>
+            <element signature="e#19#60#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -685,6 +641,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/utils/Document.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="575">
+          <caret line="46" column="7" selection-start-line="46" selection-start-column="7" selection-end-line="46" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/wasm/Instructions.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="50" selection-start-line="10" selection-start-column="50" selection-end-line="10" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/parsing/Lexer.scala">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/parsing/Parser.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="16" column="7" selection-start-line="16" selection-start-column="7" selection-end-line="16" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/interpreter/Interpreter.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="69" column="21" lean-forward="true" selection-start-line="69" selection-start-column="21" selection-end-line="69" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/ast/TreeModule.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-136">
+          <caret line="86" column="16" lean-forward="true" selection-start-line="86" selection-start-column="16" selection-end-line="86" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/amyc/c/Function.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
@@ -695,37 +689,50 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/CodeGenC.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="41" selection-start-line="11" selection-start-column="41" selection-end-line="11" selection-end-column="41" />
-          <folding>
-            <element signature="e#31#48#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/UtilsC.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="41" selection-start-line="8" selection-start-column="41" selection-end-line="8" selection-end-column="41" />
+        <state relative-caret-position="-123">
+          <caret line="52" column="25" selection-start-line="52" selection-start-column="25" selection-end-line="52" selection-end-column="25" />
           <folding>
             <element signature="e#31#52#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/amyc/utils/Document.scala">
+    <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/CodePrinterC.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="353">
-          <caret line="46" column="7" selection-start-line="46" selection-start-column="7" selection-end-line="46" selection-end-column="7" />
+        <state relative-caret-position="285">
+          <caret line="19" column="27" selection-start-line="19" selection-start-column="27" selection-end-line="19" selection-end-column="27" />
+          <folding>
+            <element signature="e#23#57#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/codegenC/CodeGenC.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="311">
+          <caret line="80" column="36" lean-forward="true" selection-start-line="80" selection-start-column="36" selection-end-line="80" selection-end-column="36" />
+          <folding>
+            <element signature="e#31#48#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/amyc/c/Instructions.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="30" column="45" selection-start-line="30" selection-start-column="45" selection-end-line="30" selection-end-column="45" />
+          <folding>
+            <element signature="e#16#49#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/amyc/c/ModulePrinter.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="321">
-          <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
+        <state relative-caret-position="219">
+          <caret line="87" column="17" selection-start-line="87" selection-start-column="17" selection-end-line="87" selection-end-column="17" />
           <folding>
             <element signature="e#16#57#0" expanded="true" />
           </folding>
