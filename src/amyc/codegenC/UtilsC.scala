@@ -17,8 +17,14 @@ object UtilsC {
   case object CIntType extends CType {
     override def toString: String = "int"
   }
+  case object CBoolType extends CType {
+    override def toString: String = "bool"
+  }
   case object CSizeT extends CType {
     override def toString: String = "size_t"
+  }
+  case object CVoid extends CType {
+    override def toString: String = "void"
   }
 
   val memoryBoundary = 0
@@ -30,7 +36,8 @@ object UtilsC {
   val defaultIncludes: List[String] = List(
     "stdio",
     "stdlib",
-    "string"
+    "string",
+    "stdbool"
   )
 
   // We don't generate code for these functions in CodeGen (they are hard-coded here or in js wrapper)
@@ -63,39 +70,54 @@ object UtilsC {
 
   // Built-in implementation of concatenation
   val concatImpl: Function = {
-    val param1 = new Parameter("s1", CStringType, true)
-    val param2 = new Parameter("s2", CStringType, true)
-    Function("concat", List(param1, param2), CStringType)({
+    val local4 = "s1"
+    val local5 = "s2"
+    val param1 = new Parameter(local4, CStringType, true)
+    val param2 = new Parameter(local5, CStringType, true)
+    Function("String_concat", List(param1, param2), CStringType)({
 
-      val strLenCall1 = Call("strlen", List(param1.name))
-      val strLenCall2 = Call("strlen", List(param2.name))
+      val strLenCall1 = Call("strlen", List(GetLocal(local4)))
+      val strLenCall2 = Call("strlen", List(GetLocal(local5)))
 
       val local1 = "len1"
       val local2 = "len2"
       val local3 = "result"
-      val allocateMem = AllocateMem(Add(local1, Add(local2, Const(1))))
+      val allocateMem = AllocateMem(Add(GetLocal(local1), Add(GetLocal(local2), Const(1))))
 
-      val memCpyCall1 = Call("memcpy", List(local3, param1.name, local1), true)
-      val memCpyCall2 = Call("memcpy", List(Add(local3, local1), param2.name, Add(local2, Const(1))), true)
+      val memCpyCall1 = Call("memcpy", List(GetLocal(local3), GetLocal(local4), GetLocal(local1)), true)
+      val memCpyCall2 = Call("memcpy", List(Add(GetLocal(local3), GetLocal(local1)), GetLocal(local5), Add(GetLocal(local2), Const(1))), true)
 
       SetLocal(local1, CSizeT, strLenCall1, true) <:>
-      SetLocal(local2, CSizeT, strLenCall2, true) <:>
-      SetLocal(local3, CStringType, allocateMem) <:>
-      memCpyCall1 <:> memCpyCall2
+        SetLocal(local2, CSizeT, strLenCall2, true) <:>
+        SetLocal(local3, CStringType, allocateMem) <:>
+        memCpyCall1 <:> memCpyCall2 <:>
+        Return(GetLocal(local3))
 
     })
+  }
+
+  val printStringImpl: Function = {
+    val paramString = "%s"
+    val local1 = "string"
+    val param = new Parameter(local1, CStringType)
+
+    Function("Std_printString", List(param), CVoid){
+      Call("printf", List(paramString, GetLocal(local1)), true)
+    }
+
   }
 
   //val digitToStringImpl: Function = ???
 
   //val readStringImpl: Function = ???
 
-  val cFunctions = List(concatImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
+  val cFunctions = List(concatImpl, printStringImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
 
   implicit def toCArgs(args: List[ParamDef]): List[Parameter] = args.map(a => new Parameter(a.name, a.tt.tpe))
   implicit def i2s(i: Name): String = i.name
   implicit def toCType(tpe: Type): CType = tpe match {
     case IntType => CIntType
+    case BooleanType => CBoolType
     case _ => CStringType
   }
   implicit def s2is(s: String): Code = Strng(s)

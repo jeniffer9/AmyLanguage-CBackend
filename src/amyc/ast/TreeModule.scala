@@ -31,36 +31,44 @@ trait TreeModule {
 
   // Expressions
   trait Expr extends Tree
+  trait RetType
 
   // Variables
-  case class Variable(name: Name) extends Expr
+  case class Variable(name: Name) extends Expr with RetType
 
   // Literals
-  trait Literal[+T] extends Expr { val value: T }
+  trait Literal[+T] extends Expr with RetType { val value: T }
   case class IntLiteral(value: Int) extends Literal[Int]
   case class BooleanLiteral(value: Boolean) extends Literal[Boolean]
   case class StringLiteral(value: String) extends Literal[String]
   case class UnitLiteral() extends Literal[Unit] { val value: Unit = () }
 
   // Binary operators
-  case class Plus(lhs: Expr, rhs: Expr) extends Expr
-  case class Minus(lhs: Expr, rhs: Expr) extends Expr
-  case class Times(lhs: Expr, rhs: Expr) extends Expr
-  case class Div(lhs: Expr, rhs: Expr) extends Expr
-  case class Mod(lhs: Expr, rhs: Expr) extends Expr
-  case class LessThan(lhs: Expr, rhs: Expr) extends Expr
-  case class LessEquals(lhs: Expr, rhs: Expr) extends Expr
-  case class And(lhs: Expr, rhs: Expr) extends Expr
-  case class Or(lhs: Expr, rhs: Expr) extends Expr
-  case class Equals(lhs: Expr, rhs: Expr) extends Expr
-  case class Concat(lhs: Expr, rhs: Expr) extends Expr
+  trait BinaryOperator extends Expr with RetType {
+    val lhs: Expr
+    val rhs: Expr
+  }
+  case class Plus(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class Minus(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class Times(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class Div(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class Mod(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class LessThan(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class LessEquals(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class And(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class Or(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class Equals(lhs: Expr, rhs: Expr) extends BinaryOperator
+  case class Concat(lhs: Expr, rhs: Expr) extends BinaryOperator
 
   // Unary operators
-  case class Not(e: Expr) extends Expr
-  case class Neg(e: Expr) extends Expr
+  trait UnaryOperator extends Expr with RetType {
+    val e: Expr
+  }
+  case class Not(e: Expr) extends UnaryOperator
+  case class Neg(e: Expr) extends UnaryOperator
 
   // Function/ type constructor call
-  case class Call(qname: QualifiedName, args: List[Expr]) extends Expr
+  case class Call(qname: QualifiedName, args: List[Expr]) extends Expr with RetType
   // The ; operator
   case class Sequence(e1: Expr, e2: Expr) extends Expr
   // Local variable definition
