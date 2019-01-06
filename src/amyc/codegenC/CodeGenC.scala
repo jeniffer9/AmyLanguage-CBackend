@@ -16,7 +16,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
   def run(ctx: Context)(v: (Program, SymbolTable)): Module = {
     val (program, table) = v
 
-    
+
     // Generate code for an Amy module
     def cgModule(moduleDef: ModuleDef): List[Function] = {
       val ModuleDef(name, defs, optExpr) = moduleDef
@@ -37,9 +37,12 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       // module and function name, since we put everything in the same c file.
       val name = fullName(owner, fd.name)
       Function(name, fd.params, fd.retType.tpe){
-        val body = cgExpr(fd.body)(!isMain)
+        val body = cgExpr(fd.body)(ret = !(isMain || fd.retType.tpe == UnitType))
         if (isMain) {
-          body <:> Return(Const(0))
+          val (front, last) = body.instructions.splitAt(body.instructions.size-1)
+          println("hello", body.instructions.head)
+          println(front, "test", last)
+          front <:> Seq(last) <:> Return(Const(0))
         } else {
           body
         }
@@ -96,7 +99,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
               False
             }
           case StringLiteral(value) => Strng(value)
-          case UnitLiteral() => ???
+          case UnitLiteral() => Unit
           case AmyCall(qname, args: List[Expr]) =>
             if (table.getFunction(qname).isDefined) {
               //function call
@@ -113,7 +116,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
         }
 
       case Sequence(e1: Expr, e2: Expr) =>
-        Seq(cgExpr(e1)(false), cgExpr(e2))
+        Seq(cgExpr(e1)(false)) <:> cgExpr(e2)
       case Let(df, value: Expr, body: Expr) =>
         SetLocal(df.name, df.tt.tpe, cgExpr(value)(false)) <:> cgExpr(body)
       case Ite(cond: Expr, thenn: Expr, elze: Expr) =>

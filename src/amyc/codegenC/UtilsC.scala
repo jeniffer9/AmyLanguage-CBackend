@@ -118,6 +118,7 @@ object UtilsC {
   implicit def toCType(tpe: Type): CType = tpe match {
     case IntType => CIntType
     case BooleanType => CBoolType
+    case UnitType => CVoid
     case _ => CStringType
   }
   implicit def s2is(s: String): Code = Strng(s)

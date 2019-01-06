@@ -45,6 +45,7 @@ object ModulePrinter {
   private def mkCode(code: Code): List[Document] = code.instructions match {
     case Nil => Nil
     case h :: t => h match {
+      case Unit => mkCode(t)
       case If(_) =>
         mkInstr(h) ::
           (mkCode(t) map Indented)
@@ -74,9 +75,8 @@ object ModulePrinter {
       case Return(code) =>
         Lined(mkInstr(h) :: mkCode(code) ::: List(mkInstr(SemCol))) ::
         mkCode(t)
-      case Seq(c1, c2) =>
+      case Seq(c1) =>
         Lined(mkCode(c1) ::: List(mkInstr(SemCol))) ::
-        mkCode(c2) :::
         mkCode(t)
       case _ =>
         mkInstr(h) ::

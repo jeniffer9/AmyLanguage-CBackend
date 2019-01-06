@@ -35,8 +35,9 @@ object Instructions {
 
   case class Not(body: Code) extends Prefix
   case class Neg(body: Code) extends Prefix
-
+  case object Unit extends Instruction
   case object SemCol extends Instruction
+
   case object True extends Instruction
   case object False extends Instruction
 
@@ -46,7 +47,7 @@ object Instructions {
   case object End extends Instruction // Marks the end of an if-then-else or block
   case class Call(name: String, params: List[Code], semcol: Boolean = false) extends Instruction
   case class Return(code: Code) extends Instruction
-  case class Seq(e1: Code, e2: Code) extends Instruction
+  case class Seq(c1: Code) extends Instruction
 
   // Locals (parameters, local variables)
   case class GetLocal(name: String) extends Instruction
