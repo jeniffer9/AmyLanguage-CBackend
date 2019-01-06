@@ -1,0 +1,22 @@
+Give code examples where your extension is useful, and describe how they work
+with it. Make sure you include examples where the most intricate features of
+your extension are used, so that we have an immediate understanding of what the
+challenges are.
+
+You can pretty-print tool code like this:
+\begin{lstlisting}
+object {
+  def main() : Unit = { println(new A().foo(-41)); }
+}
+
+class A {
+  def foo(i : Int) : Int = {
+    var j : Int;
+    if(i < 0) { j = 0 - i; } else { j = i; }
+    return j + 1;
+  }
+}
+\end{lstlisting}
+
+This section should convince us that you understand how your extension can be
+useful and that you thought about the corner cases.
