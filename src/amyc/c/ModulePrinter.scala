@@ -11,11 +11,28 @@ object ModulePrinter {
 
   private def mkMod(mod: Module): Document = Stacked(
     Stacked(mod.imports map mkImport),
+    Stacked(mod.functions.dropRight(1) map mkDeclaration),
     Stacked(mod.functions map mkFun)
   )
 
   private def mkImport(s: String): Document =
     Lined(List("#include <", s, ".h>"))
+
+  private def mkDeclaration(fh: Function): Document = {
+    val retType = fh.retType.toString
+    val paramsDoc: Document = if (fh.args == 0) "" else {
+      Lined(List(
+        "(",
+        Lined(fh.args.map(mkParam), ", "),
+        ")"
+      ))
+    }
+    Stacked(
+      "",
+      Lined(List(s"${retType} ${fh.name}", paramsDoc, mkInstr(SemCol))),
+    )
+  }
+
 
   private def mkFun(fh: Function): Document = {
     val retType = fh.retType.toString
@@ -46,6 +63,9 @@ object ModulePrinter {
     case Nil => Nil
     case h :: t => h match {
       case Unit => mkCode(t)
+      case OneLiner(c) =>
+        Lined(mkCode(c) ::: List(mkInstr(SemCol))) ::
+        mkCode(t)
       case If(_) =>
         mkInstr(h) ::
           (mkCode(t) map Indented)

@@ -97,21 +97,41 @@ object UtilsC {
   }
 
   val printStringImpl: Function = {
-    val paramString = "%s"
+    val paramString = "%s\\n"
     val local1 = "string"
     val param = new Parameter(local1, CStringType)
 
-    Function("Std_printString", List(param), CVoid){
+    Function("Std_printString", List(param), CVoid) {
       Call("printf", List(paramString, GetLocal(local1)), true)
     }
-
   }
 
-  //val digitToStringImpl: Function = ???
+  val printIntImpl: Function = {
+    val paramInt = "%d\\n"
+    val local1 = "integer"
+    val param = new Parameter(local1, CIntType)
 
+    Function("Std_printInt", List(param), CVoid) {
+      Call("printf", List(paramInt, GetLocal(local1)), true)
+    }
+  }
+
+  val digitToStringImpl: Function = {
+    val paramDigit = "%d"
+    val local1 = "digit"
+    val param = new Parameter(local1, CIntType)
+
+    val local2 = "string"
+
+    Function("Std_digitToString", List(param), CStringType) {
+      SetLocal(local2, CStringType, AllocateMem(Call("sizeof", List(GetLocal("int"))))) <:>
+      Call("sprintf", List(GetLocal(local2), paramDigit, GetLocal(local1)), true) <:>
+      Return(GetLocal(local2))
+    }
+  }
   //val readStringImpl: Function = ???
 
-  val cFunctions = List(concatImpl, printStringImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
+  val cFunctions = List(concatImpl, printStringImpl, printIntImpl, digitToStringImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
 
   implicit def toCArgs(args: List[ParamDef]): List[Parameter] = args.map(a => new Parameter(a.name, a.tt.tpe))
   implicit def i2s(i: Name): String = i.name
