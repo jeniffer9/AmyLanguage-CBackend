@@ -39,7 +39,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       Function(name, fd.params, fd.retType.tpe) {
         val body = cgExpr(fd.body, fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType))
         if (isMain) {
-          val (front, last) = body.instructions.splitAt(body.instructions.size - 1)
+          val (front, last) = body.instructions.splitAt(body.instructions.size-1)
           front <:> Seq(last) <:> Return(Const(0))
         } else {
           body
