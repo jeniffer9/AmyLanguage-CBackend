@@ -57,7 +57,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       if (oneLiner) {
         expr match {
           case Ite(cond, thenn, elze) => If(cgExpr(cond)) <:> cgExpr(thenn, true) <:> Else <:> cgExpr(elze, true) <:> End
-          case _ =>  OneLiner(cgExpr(expr))
+          case _ => OneLiner(cgExpr(expr))
         }
       } else {
         expr match {
@@ -125,7 +125,14 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
           case Sequence(e1: Expr, e2: Expr) =>
             Seq(cgExpr(e1)(false)) <:> cgExpr(e2)
           case Let(df, value: Expr, body: Expr) =>
-            SetLocal(df.name, df.tt.tpe, cgExpr(value)(false)) <:> cgExpr(body)
+            val valueCode = cgExpr(value)(false)
+            valueCode.instructions.head match {
+              case Call(name, _, _) if (name == "Std_readString") =>
+                SetLocal(df.name, df.tt.tpe, AllocateMem(Const(5000))) <:> Call("scanf", List("%s", GetLocal(df.name)), true) <:> cgExpr(body)
+              case Call(name, _, _) if (name == "Std_readInt") =>
+                SetLocal(df.name, df.tt.tpe, Const(0)) <:> Call("scanf", List("%d", GetLocal("&"+df.name)), true) <:> cgExpr(body)
+              case _ => SetLocal(df.name, df.tt.tpe, valueCode) <:> cgExpr(body)
+            }
           case Ite(cond: Expr, thenn: Expr, elze: Expr) =>
             If(cgExpr(cond)(false)) <:> cgExpr(thenn) <:> Else <:> cgExpr(elze) <:> End
           case Match(scrut: Expr, cases: List[MatchCase]) => {

@@ -129,7 +129,16 @@ object UtilsC {
       Return(GetLocal(local2))
     }
   }
-  //val readStringImpl: Function = ???
+
+  val readStringImpl: Function = {
+    val paramString = "%s"
+    val local1 = "string"
+    val param = new Parameter(local1, CStringType)
+
+    Function("Std_readString", List(param), CVoid) {
+      Call("printf", List(paramString, GetLocal(local1)), true)
+    }
+  }
 
   val cFunctions = List(concatImpl, printStringImpl, printIntImpl, digitToStringImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
 

@@ -1,9 +1,9 @@
 object UnitTest {
 
-  def unit(x : Int) : Unit = {
-    x;
-    ()
+  def unit() : String = {
+    val s: String = Std.readString();
+    s
   }
 
-  Std.printString("UnitTest: ")
+  Std.printString("UnitTest: " ++ unit())
 }
