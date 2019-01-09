@@ -13,18 +13,36 @@ import scala.language.implicitConversions
 
 // Generates C code for an Amy program
 object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
+
   def run(ctx: Context)(v: (Program, SymbolTable)): Module = {
     val (program, table) = v
 
+    def cgTypes(moduleDef: ModuleDef): List[AbstractClass] = {
+      val ModuleDef(name, defs, _) = moduleDef
+      // Generate code for all functions
+      defs.collect {
+        case acd: AbstractClassDef => cgAbstractClass(acd, name)
+      }
+    }
+
+    def cgClasses(moduleDef: ModuleDef): List[CaseClass] = {
+      val ModuleDef(name, defs, _) = moduleDef
+      // Generate code for all functions
+      defs.collect {
+        case cc: CaseClassDef => cgCaseClass(cc, name)
+      }
+    }
 
     // Generate code for an Amy module
     def cgModule(moduleDef: ModuleDef): List[Function] = {
       val ModuleDef(name, defs, optExpr) = moduleDef
       // Generate code for all functions
-      defs.collect { case fd: FunDef if !builtInFunctions(fullName(name, fd.name)) =>
-        cgFunction(fd, name, false)
+      defs.collect {
+        case fd: FunDef if !builtInFunctions(fullName(name, fd.name)) => cgFunction(fd, name, false)
+        //case cd: CaseClassDef => cgAbstractClass(cd, name)
       } ++
         // Generate code for the "main" function, which contains the module expression
+      //FIXME handle case of no main
         optExpr.toList.map { expr =>
           val mainFd = FunDef(Identifier.fresh("main"), Nil, TypeTree(IntType), expr)
           cgFunction(mainFd, name, true)
@@ -45,6 +63,16 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
           body
         }
       }
+    }
+
+    def cgAbstractClass(acd: AbstractClassDef, owner: Identifier): AbstractClass = {
+      val name = fullName(owner, acd.name)
+      AbstractClass(name, table.getConstructorsForType(acd.name).get)
+    }
+
+    def cgCaseClass(cc: CaseClassDef, owner: Identifier): CaseClass = {
+      val name = fullName(owner, cc.name)
+      CaseClass(name, cc.fields.map(f => new Parameter("nameless", f.tpe)))
     }
 
     // Generate code for an expression expr.
@@ -164,7 +192,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       program.modules.last.name.name,
       defaultIncludes,
       globalsNo,
-      cFunctions ++ (program.modules flatMap cgModule)
+      cFunctions ++ (program.modules flatMap cgModule),
+      program.modules flatMap cgTypes,
+      program.modules flatMap cgClasses
     )
 
   }

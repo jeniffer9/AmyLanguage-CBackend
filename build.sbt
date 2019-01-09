@@ -9,7 +9,7 @@ lazy val amyc = (project in file("."))
     scalaVersion := "2.12.3",
 
     scalaSource in Compile := baseDirectory.value / "src",
-    scalacOptions ++= Seq("-feature"),
+    scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation"),
 
     scalaSource in Test := baseDirectory.value / "test" / "scala",
     parallelExecution in Test := false,
