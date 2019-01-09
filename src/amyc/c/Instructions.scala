@@ -46,6 +46,7 @@ object Instructions {
   case object Else extends Instruction // Marks the end of the implicit 'then' of an if-block
   case object End extends Instruction // Marks the end of an if-then-else or block
   case class Call(name: String, params: List[Code], semcol: Boolean = false) extends Instruction
+  case class Constructor(name: String, tpe: CType, args: List[Code]) extends Instruction
   case class Return(code: Code) extends Instruction
   case class Seq(c1: Code) extends Instruction
 

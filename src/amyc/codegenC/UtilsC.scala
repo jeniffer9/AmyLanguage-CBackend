@@ -26,6 +26,9 @@ object UtilsC {
   case object CVoid extends CType {
     override def toString: String = "void"
   }
+  case class StructType(val name: String) extends CType {
+    override def toString: String = name
+  }
 
   val memoryBoundary = 0
 
@@ -148,6 +151,7 @@ object UtilsC {
     case IntType => CIntType
     case BooleanType => CBoolType
     case UnitType => CVoid
+    case ClassType(qname) => StructType(qname)
     case _ => CStringType
   }
   implicit def s2is(s: String): Code = Strng(s)
