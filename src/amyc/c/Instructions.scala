@@ -53,6 +53,7 @@ object Instructions {
   case class GetLocal(name: String) extends Instruction
   case class SetLocal(name: String, tpe: CType, value: Code, const: Boolean = false) extends Instruction
   case class AllocateMem(size: Code) extends Instruction
+  case class OneLiner(c: Code) extends Instruction
 
   // Represents a sequence of instructions
   case class Code(instructions: List[Instruction]) {

@@ -2,7 +2,6 @@ package amyc.c
 
 import scala.language.implicitConversions
 import amyc.c.Instructions._
-import amyc.codegenC.UtilsC.CType
 import amyc.utils._
 
 // Printer for C modules
@@ -11,11 +10,58 @@ object ModulePrinter {
 
   private def mkMod(mod: Module): Document = Stacked(
     Stacked(mod.imports map mkImport),
+    Stacked(""),
+    Stacked(mod.types map mkAbstractClass),
+    Stacked(""),
+    Stacked(mod.classes map mkCaseClass),
+    Stacked(""),
+    Stacked(mod.functions.dropRight(1) map mkDeclaration),
     Stacked(mod.functions map mkFun)
   )
 
   private def mkImport(s: String): Document =
     Lined(List("#include <", s, ".h>"))
+
+  private def mkDeclaration(fh: Function): Document = {
+    val retType = fh.retType.toString
+    val paramsDoc: Document = if (fh.args == 0) "" else {
+      Lined(List(
+        "(",
+        Lined(fh.args.map(mkParam), ", "),
+        ")"
+      ))
+    }
+    Stacked(
+      Lined(List(s"${retType} ${fh.name}", paramsDoc, mkInstr(SemCol))),
+    )
+  }
+
+  private def mkAbstractClass(ac: AbstractClass): Document = {
+    val enumName = ac.name.toUpperCase
+    Stacked(
+      Lined(List("typedef enum {",
+        Lined(ac.CaseClasses.map(i => Raw(i.name.toUpperCase)), ", ")
+        , "} ", enumName, ";")
+      ),
+      "",
+      Lined(List("typedef struct ", ac.name, " {")),
+      Indented(Stacked(
+        "void* instance;",
+        Lined(List(Raw(enumName), " caseClass;")),
+      )),
+      Lined(List("} ", Raw(ac.name), ";"))
+    )
+  }
+
+  private def mkCaseClass(cc: CaseClass): Document = {
+    Stacked(
+      Lined(List("typedef struct ", cc.name, " {")),
+      Indented(Stacked(
+        cc.fields.map(f => Lined(List(mkParam(f), Raw(";"))))
+      )),
+      Lined(List("} ", Raw(cc.name), ";"))
+    )
+  }
 
   private def mkFun(fh: Function): Document = {
     val retType = fh.retType.toString
@@ -46,6 +92,9 @@ object ModulePrinter {
     case Nil => Nil
     case h :: t => h match {
       case Unit => mkCode(t)
+      case OneLiner(c) =>
+        Lined(mkCode(c) ::: List(mkInstr(SemCol))) ::
+        mkCode(t)
       case If(_) =>
         mkInstr(h) ::
           (mkCode(t) map Indented)
@@ -116,6 +165,8 @@ object ModulePrinter {
 
   def apply(mod: Module) = mkMod(mod).print
   def apply(fh: Function) = mkFun(fh).print
+  def apply(ac: AbstractClass) = mkAbstractClass(ac).print
+  def apply(cc: CaseClass) = mkCaseClass(cc).print
   def apply(instr: Instruction) = mkInstr(instr).print
 
 }
