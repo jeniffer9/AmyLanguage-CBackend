@@ -11,3 +11,5 @@ compiler/package-lock.json
 wasmout/
 .idea/*
 cout/
+
+.idea/workspace.xml
