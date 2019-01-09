@@ -57,6 +57,7 @@ object ModulePrinter {
     Stacked(
       Lined(List("typedef struct ", cc.name, " {")),
       Indented(Stacked(
+        //TODO: check when no parameters e.g. Nul case
         cc.fields.map(f => Lined(List(mkParam(f), Raw(";"))))
       )),
       Lined(List("} ", Raw(cc.name), ";"))
@@ -108,6 +109,10 @@ object ModulePrinter {
         val parameters = params.map(mkCode).map(d => Lined(d))
         val semCol: List[Document] = if (semcol) List(mkInstr(SemCol)) else List("")
         Lined(mkInstr(h) :: Raw("(") :: Lined(parameters, ", ") :: List(Raw(")")) ::: semCol) ::
+        mkCode(t)
+      case Constructor(_, args) =>
+        val argos = args.map(mkCode).map(d => Lined(d))
+        Lined(Raw("{") :: Lined(argos, ", ") :: List(Raw("}"))) ::
         mkCode(t)
       case SetLocal(_, _, value, _) =>
         Lined(mkInstr(h) :: mkCode(value) ::: List(mkInstr(SemCol))) ::

@@ -39,7 +39,6 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       // Generate code for all functions
       defs.collect {
         case fd: FunDef if !builtInFunctions(fullName(name, fd.name)) => cgFunction(fd, name, false)
-        //case cd: CaseClassDef => cgAbstractClass(cd, name)
       } ++
         // Generate code for the "main" function, which contains the module expression
       //FIXME handle case of no main
@@ -72,7 +71,8 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
 
     def cgCaseClass(cc: CaseClassDef, owner: Identifier): CaseClass = {
       val name = fullName(owner, cc.name)
-      CaseClass(name, cc.fields.map(f => new Parameter("nameless", f.tpe)))
+      val index = table.getConstructor(cc.name).get.index
+      CaseClass(name, cc.fields.zipWithIndex.map{case (f,i) => new Parameter("field" + i, f.tpe)}, index)
     }
 
     // Generate code for an expression expr.
@@ -141,7 +141,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                   val fun = table.getFunction(qname).get
                   Call(fullName(fun.owner, qname), args.map(cgExpr(_)(false)))
                 } else {
-                  ???
+                  val c = table.getConstructor(qname).get
+                  Constructor(fullName(c.parent, qname), c.retType, args.map(cgExpr(_)(false)))
+                  //???
                 }
             }
             if (ret) {
