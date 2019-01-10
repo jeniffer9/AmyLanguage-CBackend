@@ -72,7 +72,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
     def cgCaseClass(cc: CaseClassDef, owner: Identifier): CaseClass = {
       val name = fullName(owner, cc.name)
       val index = table.getConstructor(cc.name).get.index
-      CaseClass(name, cc.fields.zipWithIndex.map{case (f,i) => new Parameter("field" + i, f.tpe)}, index)
+      CaseClass(name, cc.fields.map(f => new Parameter(f.name, f.tt.tpe)))
     }
 
     // Generate code for an expression expr.

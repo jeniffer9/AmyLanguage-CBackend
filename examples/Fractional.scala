@@ -1,4 +1,4 @@
-object Fractionals {
+object Fractional {
 
   // Type definition of the Rational type
   abstract class Rational
