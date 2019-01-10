@@ -5,6 +5,8 @@
 //----------------------------------------------
 //----------------------------------------------
 // L.List: Case Classes
+//typedef struct L_List* L_List;
+
 typedef enum {NIL, CONS} L_LIST;
 
 //----------------------------------------------
@@ -12,23 +14,23 @@ typedef enum {NIL, CONS} L_LIST;
 typedef struct L_List {
 	void* instance;
 	L_LIST caseClass;
-} L_List;
+} AbstractClass_L_List, *L_List; // Object, then pointer to object
 
 //----------------------------------------------
 // Case Class: Cons
 typedef struct Cons {
 	int head;
-	L_List* tail;
+	L_List tail;
 } Cons;
 
 // Case class constructor
-L_List* l_list_cons(int head, L_List *tail) 
+L_List l_list_cons(int head, L_List tail) 
 {
 	Cons* cons = malloc(sizeof(Cons));
     cons->head = head;
     cons->tail = tail;
 	
-	L_List* l_list = malloc(sizeof(L_List));
+	L_List l_list = malloc(sizeof(L_List));
     l_list->instance = cons;
     l_list->caseClass = CONS;
     
@@ -56,10 +58,10 @@ L_List* l_list_cons(int head, L_List *tail)
 typedef struct Nil {} Nil;
 
 // Case class constructor
-L_List* l_list_nil() 
+L_List l_list_nil() 
 {
 	Nil nil = {};
-	L_List* l_list = malloc(sizeof(L_List));
+	L_List l_list = malloc(sizeof(L_List));
 	l_list->instance = &nil;
     l_list->caseClass = NIL;
 	return l_list;
@@ -74,7 +76,7 @@ L_List* l_list_nil()
 
 //----------------------------------------------
 //----------------------------------------------
-int head(L_List* l) 
+int head(L_List l) 
 {	
 	switch(l->caseClass) {
 		case CONS:
@@ -112,20 +114,20 @@ int head(L_List* l)
     //}
   //}
   
-L_List* merge(L_List* l1, L_List* l2)
+L_List merge(L_List l1, L_List l2)
 {
 	switch(l1->caseClass) {
 		case NIL:
 			return l2;
 		case CONS: {
 			int h1 = inst_cons(l1)->head;
-			L_List* t1 = (inst_cons(l1)->tail);
+			L_List t1 = (inst_cons(l1)->tail);
 			switch(l2->caseClass) { // get CaseClass // careful naming
 				case NIL:
 					return l1;
 				case CONS: {
 					int h2 = inst_cons(l2)->head;
-					L_List* t2 = (inst_cons(l2)->tail);
+					L_List t2 = (inst_cons(l2)->tail);
 					if(h1 <= h2) {
 						return l_list_cons(h1, merge(t1, l2));
 					} else {
@@ -146,12 +148,12 @@ L_List* merge(L_List* l1, L_List* l2)
 int main()
 {
 	// val l_good: L.List = Cons(2, Nil()) translates to
-	L_List* good = l_list_cons(8, l_list_cons(6, l_list_cons(2, l_list_nil())));
-	L_List* t = ((inst_cons(good))->tail);
+	L_List good = l_list_cons(8, l_list_cons(6, l_list_cons(2, l_list_nil())));
+	L_List t = ((inst_cons(good))->tail);
 	printf("%d\n", head(good));
 	printf("%d test \n", head(t));
 	
-	L_List* bad = l_list_nil();
+	L_List bad = l_list_nil();
 	printf("%d\n", head(bad));
 	
 	printf("%d\n", head(merge(good, bad)));
