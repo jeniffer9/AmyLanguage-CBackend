@@ -110,7 +110,7 @@ object ModulePrinter {
         val semCol: List[Document] = if (semcol) List(mkInstr(SemCol)) else List("")
         Lined(mkInstr(h) :: Raw("(") :: Lined(parameters, ", ") :: List(Raw(")")) ::: semCol) ::
         mkCode(t)
-      case Constructor(_, args) =>
+      case Constructor(_, _, args) =>
         val argos = args.map(mkCode).map(d => Lined(d))
         Lined(Raw("{") :: Lined(argos, ", ") :: List(Raw("}"))) ::
         mkCode(t)
