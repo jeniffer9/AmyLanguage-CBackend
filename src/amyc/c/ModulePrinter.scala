@@ -57,8 +57,7 @@ object ModulePrinter {
 
   private def mkCaseClass(cc: CaseClass): Document = {
     val paramNames: List[String] = cc.fields.map(_.name)
-    val valName: String = cc.name.split('_')(1).toLowerCase
-    val tpe: String = cc.owner + "_" + cc.tpe
+    val valName: String = cc.name.toLowerCase
     Stacked(
       Lined(List("typedef struct ", cc.name, " {")),
       Indented(Stacked(
@@ -67,10 +66,10 @@ object ModulePrinter {
       )),
       Lined(List("} ", Raw(cc.name), ";")),
       "",
-      mkFun(Function(cc.name + "_Constructor", cc.fields, StructType(tpe)){
+      mkFun(Function(cc.name + "_Constructor", cc.fields, StructType(cc.tpe)){
         SetLocal(valName, Pointer(StructType(cc.name)), AllocateMem(GetLocal("sizeof("+cc.name+")"))) <:>
         cc.fields.map(f => SetProperty(valName, f.name, f.name)) <:> GetLocal("") <:>
-        SetLocal(cc.tpe.toLowerCase, StructType(tpe), AllocateMem(GetLocal("sizeof("+abstractName(tpe)+")"))) <:>
+        SetLocal(cc.tpe.toLowerCase, StructType(cc.tpe), AllocateMem(GetLocal("sizeof("+abstractName(cc.tpe)+")"))) <:>
         SetProperty(cc.tpe.toLowerCase, "instance", valName) <:>
           SetProperty(cc.tpe.toLowerCase, "caseClass", cc.index.toString) <:>
           GetLocal("") <:> Return(GetLocal(cc.tpe.toLowerCase))
@@ -100,10 +99,7 @@ object ModulePrinter {
   }
 
   private def mkParam(param: Parameter): Document = {
-    val tpeS = param.tpe.toString
-    val tpe = if(param.module != null && (param.tpe match {case StructType(_) => true case _ => false})) //fullName for structs params
-      param.module ++ "_" ++ tpeS
-      else tpeS
+    val tpe = param.tpe.toString
     val const = if (param.const) "const " else ""
     Raw(const ++ tpe ++ " " ++ param.name)
   }
@@ -167,6 +163,7 @@ object ModulePrinter {
   private def mkInstr(instr: Instruction): Document = instr match {
     case SetProperty(of, prop, to) => s"$of->$prop = $to;"
     case GetProperty(_, _) => "->"
+    case Define(what, to) => Lined("#define " :: mkCode(what) ::: List(Raw(" ")) ::: mkCode(to))
     case Const(value) => s"$value"
     case Add(_, _) => " + "
     case Sub(_, _) => " - "

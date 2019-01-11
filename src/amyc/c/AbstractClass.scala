@@ -4,7 +4,7 @@ import amyc.ast.Identifier
 
 import scala.language.implicitConversions
 
-class AbstractClass private (val name: String,val CaseClasses: List[Identifier]) {
+class AbstractClass private (val name: String, val CaseClasses: List[Identifier]) {
   override def toString: String = ModulePrinter(this)
 }
 
