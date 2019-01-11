@@ -1,4 +1,4 @@
-This is a very important section, you explain to us how you made it work.
+%This is a very important section, you explain to us how you made it work.
 
 \subsection{Theoretical Background}
 If you are using theoretical concepts, explain them first in this subsection.
@@ -29,7 +29,7 @@ Additionally we added an AbstractClass and a CaseClass, inspired from the Functi
 
 AbstractClass: (takes the typeName as parameter)
 The abstract class implements the equivalent to a type by creating a struct with the defined type name, typedefing it to
-it's "abstract name" - which consists simply by adding "Abstract_" in front of it - and then simutaneously creating a pointer
+it's "abstract name" - which consists simply by adding "Abstract\_" in front of it - and then simultaneously creating a pointer
 which is being used whenever make use of the type.
 
 CaseClass: (takes: name, list of it's fields, case index, type)
@@ -37,8 +37,8 @@ We are here making use of the individual index assigned to each constructor for 
 
 The hardest part was finding a working and readable substitution for Amy's abstract and case class (which extend the abstract class) functionality.
 How can we have "generics" and "inheritance" in C: that seemed like an impossible challenge.
-Basicaly, every time we call a constructor, the C code calls the associated constructor which does all the work for us and
-just returns the right type struct containing a pointer to aninstance of the actual CaseClass and a caseClass field containing
+Basically, every time we call a constructor, the C code calls the associated constructor which does all the work for us and
+just returns the right type struct containing a pointer to an instance of the actual CaseClass and a caseClass field containing
 the index which will be very useful when implementing the pattern matching.
 
 Parameter: (takes: name, type)
@@ -77,7 +77,7 @@ ModulePrinter. The main difference is that the types, the Constructors and the F
 instead of all together by at the same time taking cate of the correct C syntax.
 
 The PatternMatching was by far the hardest challenge. Next to returning a boolean if the actual case actually matches
-we also return code which is evaluated before the actual caseExpression to declare the added new local varaibles.
+we also return code which is evaluated before the actual caseExpression to declare the added new local variables.
 If the pattern is an IdPattern we may face the situation where we don't know about the type of the new local,
 so we cam up with the solution to create a define statement which creates a macro in C and set it equal to the current
 expression which is being matched. Thus we can just call the name of the local which is then evaluated
