@@ -38,7 +38,7 @@ object NameAnalyzer extends Pipeline[N.Program, (S.Program, SymbolTable)] {
         case N.ClassType(qn@N.QualifiedName(module, name)) =>
           table.getType(module getOrElse inModule, name) match {
             case Some(symbol) =>
-              S.ClassType(symbol)
+              S.ClassType(symbol)//(Identifier(module getOrElse inModule))
             case None =>
               fatal(s"Could not find type $qn", tt)
           }
