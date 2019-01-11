@@ -5,7 +5,10 @@ If you are using theoretical concepts, explain them first in this subsection.
 Even if they come from the course (eg. lattices), try to explain the essential
 points \emph{in your own words}. Cite any reference work you used like this
 \cite{TigerBook}. This should convince us that you know the theory behind what
-you coded. 
+you coded.
+
+For the pattern matching we went on with the matchAndBinding function approach which returns a boolean and the new defined locals for and individual case, as we have seen in the course. With the boolean we evaluate, if the specific case is the one we should truly be matching on. The condition also includes the parameters. So basically for a wildcard and an id pattern it is always true. For the id pattern, the id is then additionally added to the list of locals, associating the expression that is being matched on with the this newly defined id.
+For the Case Classes we check that it's the same Class for the given type and the the literals we match directly on the matching expression.
 
 \subsection{Implementation Details}
 %Describe all non-obvious tricks you used. Tell us what you thought was hard and
@@ -20,4 +23,4 @@ you coded.
 %for the harder parts.
 The hardest part was finding a working and readable substitution for Amy's abstract and case class (which extend the abstract class) functionality.
 How can we have "generics" and "inheritance" in C: that seemed like an impossible challenge.
-So we contemplated on how to achieve this and sat down and tried to come up with ways 
+So we contemplated on how to achieve this and sat down and tried to come up with ways
