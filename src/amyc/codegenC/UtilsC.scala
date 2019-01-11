@@ -111,7 +111,7 @@ object UtilsC {
 
     Function("Std_digitToString", List(param), CStringType) {
       SetLocal(local2, CStringType, AllocateMem(Call("sizeof", List(GetLocal("int"))))) <:>
-      Call("printf", List(GetLocal(local2), paramDigit, GetLocal(local1)), true) <:>
+      Call("sprintf", List(GetLocal(local2), paramDigit, GetLocal(local1)), true) <:>
       Return(GetLocal(local2))
     }
   }
