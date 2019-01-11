@@ -49,15 +49,17 @@ object Instructions {
   case class Constructor(args: List[Code]) extends Instruction
   case class Return(code: Code) extends Instruction
   case class Seq(c1: Code) extends Instruction
+  case class Define(what: Code, to: Code) extends Instruction
+  case class ElsIf(cond: Code) extends Instruction
 
   // Locals (parameters, local variables)
   case class GetLocal(name: String) extends Instruction
   case class SetLocal(name: String, tpe: CType, value: Code, const: Boolean = false) extends Instruction
   case class AllocateMem(size: Code) extends Instruction
   case class SetProperty(of: String, prop: String, to: String) extends Instruction
+  case class GetProperty(of: Code, prop: Code) extends Instruction
   case class OneLiner(c: Code) extends Instruction
-  case class Switch(scrut: Code, cases: List[Code]) extends Instruction
-  case class Case(c: Code) extends Instruction
+  case class Case(cond: Code, body: Code) extends Instruction
 
   // Represents a sequence of instructions
   case class Code(instructions: List[Instruction]) {

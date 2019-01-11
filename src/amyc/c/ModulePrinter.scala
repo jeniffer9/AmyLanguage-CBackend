@@ -57,8 +57,7 @@ object ModulePrinter {
 
   private def mkCaseClass(cc: CaseClass): Document = {
     val paramNames: List[String] = cc.fields.map(_.name)
-    val valName: String = cc.name.split('_')(1).toLowerCase
-    val tpe: String = cc.owner + "_" + cc.tpe
+    val valName: String = cc.name.toLowerCase
     Stacked(
       Lined(List("typedef struct ", cc.name, " {")),
       Indented(Stacked(
@@ -67,16 +66,16 @@ object ModulePrinter {
       )),
       Lined(List("} ", Raw(cc.name), ";")),
       "",
-      mkFun(Function(cc.name + "_Constructor", cc.fields, StructType(tpe)){
+      mkFun(Function(cc.name + "_Constructor", cc.fields, StructType(cc.tpe)){
         SetLocal(valName, Pointer(StructType(cc.name)), AllocateMem(GetLocal("sizeof("+cc.name+")"))) <:>
         cc.fields.map(f => SetProperty(valName, f.name, f.name)) <:> GetLocal("") <:>
-        SetLocal(cc.tpe.toLowerCase, StructType(tpe), AllocateMem(GetLocal("sizeof("+abstractName(tpe)+")"))) <:>
+        SetLocal(cc.tpe.toLowerCase, StructType(cc.tpe), AllocateMem(GetLocal("sizeof("+abstractName(cc.tpe)+")"))) <:>
         SetProperty(cc.tpe.toLowerCase, "instance", valName) <:>
           SetProperty(cc.tpe.toLowerCase, "caseClass", cc.index.toString) <:>
           GetLocal("") <:> Return(GetLocal(cc.tpe.toLowerCase))
       }),
       "",
-      Raw("#define instance_"+valName+"(abstr_class)(("+Pointer(StructType(tpe))+")abstr_class->instance")
+      Raw("#define instance_"+valName+"(abstr_class)(("+Pointer(StructType(cc.name))+")abstr_class->instance)")
     )
   }
 
@@ -100,10 +99,7 @@ object ModulePrinter {
   }
 
   private def mkParam(param: Parameter): Document = {
-    val tpeS = param.tpe.toString
-    val tpe = if(param.module != null && (param.tpe match {case StructType(_) => true case _ => false})) //fullName for structs params
-      param.module ++ "_" ++ tpeS
-      else tpeS
+    val tpe = param.tpe.toString
     val const = if (param.const) "const " else ""
     Raw(const ++ tpe ++ " " ++ param.name)
   }
@@ -115,12 +111,17 @@ object ModulePrinter {
       case OneLiner(c) =>
         Lined(mkCode(c) ::: List(mkInstr(SemCol))) ::
         mkCode(t)
+      case Case(cond, body) =>
+        mkCode(If(cond)) ::: mkCode(body) ::: List(Raw("}")) ::: mkCode(t)
       case If(_) =>
         mkInstr(h) ::
           (mkCode(t) map Indented)
       case Else =>
         Unindented(mkInstr(h)) ::
         mkCode(t)
+      case ElsIf(_) =>
+        Unindented(mkInstr(h)) ::
+          (mkCode(t))
       case End =>
         Unindented(mkInstr(h)) ::
         (mkCode(t) map Unindented)
@@ -151,9 +152,8 @@ object ModulePrinter {
       case Seq(c1) =>
         Lined(mkCode(c1) ::: List(mkInstr(SemCol))) ::
         mkCode(t)
-      case Switch(scrut, cases) =>
-        Lined("switch(" :: Lined(mkCode(scrut)) :: List(Raw("){"))) ::
-          cases.map(c => Stacked(mkCode(c))) ::: mkCode(t)
+      case GetProperty(of, prop) =>
+        Lined(mkCode(of) ::: List(mkInstr(h)) ::: mkCode(prop)) :: mkCode(t)
       case _ =>
         mkInstr(h) ::
         mkCode(t)
@@ -162,7 +162,8 @@ object ModulePrinter {
 
   private def mkInstr(instr: Instruction): Document = instr match {
     case SetProperty(of, prop, to) => s"$of->$prop = $to;"
-    case Case(c) => Lined("case " :: mkCode(c))
+    case GetProperty(_, _) => "->"
+    case Define(what, to) => Lined("#define " :: mkCode(what) ::: List(Raw(" ")) ::: mkCode(to))
     case Const(value) => s"$value"
     case Add(_, _) => " + "
     case Sub(_, _) => " - "
@@ -177,6 +178,7 @@ object ModulePrinter {
     case Not(_) => "!"
     case Neg(_) => "-"
     case If(cond) => Lined(Raw("if (") :: mkCode(cond) ::: List(Raw(") {")))
+    case ElsIf(cond) => Lined(Raw("} else if (") :: mkCode(cond) ::: List(Raw(") {")))
     case Else => "} else {"
     case Return(_) => "return "
     case End => "}"
