@@ -1,5 +1,25 @@
 If you did not finish what you had planned, explain here what's missing.
 
-In any case, describe how you could further extend your compiler in the
-direction you chose. This section should convince us that you understand the
-challenges of writing a good compiler for high-level programming languages.
+%In any case, describe how you could further extend your compiler in the
+%direction you chose. This section should convince us that you understand the
+%challenges of writing a good compiler for high-level programming languages.
+
+There would be several possible extensions and we might continue working on it because simple AmyCode is easily translated to good usable C code.
+The biggest possible extension is naming of our structures and types. Our CaseClass parameters are currently only named in a running sequence of indices. This is due to the fact that in the pattern matching the user defines the "variable names" and they may not necessarily match the case parameters. This leads to the main extension which is having a big map that keeps track of the modules and which abstract class holds which case classes and in turn to which parameters they have.
+
+It is not a huge thing to do but with all of our other exams this is something we leave for when we revisit the code next time.
+
+Conveniently would also be to move the function signatures that are generated into a separate header(.h) file which is then imported with $\#$include "library.h".
+Along these lines we could also instead of concatenating everything into a file, generate a folder, convert all the files from sbt run \textless modules.scala* main.scala\textgreater\space individually to C and then import the modules into the main file (last one) and run that file (main).
+
+Another cool idea which only loosely fits with the description but would be very useful in achieving better readability would be augmenting the lexer with saving comments right before a def and save them in a map with the name after the def. We could then map back part of the original documentation and perhaps that would serve having better readable C code (when the programmer followed good comment practice describing what the function does rather than how).
+
+One thing we not fulfilled upon was our promise to deliver C code that does not produce warnings. We discovered during our journey that when a user does not suppress a parameter in a pattern match that is not needed that C will issue a warning of an unused variable (our implementation generates a variable for every parameter and then uses them)
+
+Access restriction, allocation and const
+
+switch  
+
+promise no warnings
+
+h files with function signatures
