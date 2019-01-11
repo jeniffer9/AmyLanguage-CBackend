@@ -52,7 +52,6 @@ object ModulePrinter {
   }
 
   private def mkCaseClass(cc: CaseClass): Document = {
-    val paramNames: List[String] = cc.fields.map(_.name)
     val valName: String = cc.name.toLowerCase
     Stacked(
       Lined(List("typedef struct ", cc.name, " {")),

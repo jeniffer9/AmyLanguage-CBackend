@@ -20,7 +20,7 @@ object Instructions {
     val body: Code
   }
 
-  // Numeric/logical instructions (all take i32 operands)
+  // Numeric/logical instructions
   case class Add(lhs: Code, rhs: Code) extends Infix
   case class Sub(lhs: Code, rhs: Code) extends Infix
   case class Mul(lhs: Code, rhs: Code) extends Infix
@@ -35,6 +35,7 @@ object Instructions {
 
   case class Not(body: Code) extends Prefix
   case class Neg(body: Code) extends Prefix
+
   case object Unit extends Instruction
   case object SemCol extends Instruction
 
