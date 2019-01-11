@@ -16,10 +16,22 @@ Another cool idea which only loosely fits with the description but would be very
 
 One thing we not fulfilled upon was our promise to deliver C code that does not produce warnings [but in a positive way]. We discovered during our journey that when a user does not suppress a parameter in a pattern match that is not needed that C will issue a warning of an unused variable. And when you think about it this is correct it is not a warning generated because of a bad code translation but a genuine warning that makes sense. So our C backend project actually helped me improve my example code written in the very first lab! I could replace the not used parameters with wildcards and Amy code still works. So our C backend project was not only code translation but also created a warning system for Amy code.
 
-Access restriction, allocation and const
+Another possible extension could be improved translation of code. Better access restriction in our C code by making our variables, constants. Also we could better allocate and free memory. Which would be tricky because we have to keep track of all of our allocation and determine when to free them (non-trivial).
 
-switch  
+One addition we had partially done was having an enum that maps all case classes to enums and the goal would have then been if we encounter a CaseClassPattern to actually use a switch instead of a simple if. This is not yet finalized but would be a great and not too hard starting point for picking off again the project.
 
-promise no warnings
+\begin{lstlisting}
+typedef enum {NIL, CONS} L_LIST;
 
-h files with function signatures
+which would have allowed:
+
+int head(L_List l) {	
+	switch(l->caseClass) {
+		case CONS:
+			return inst_cons(l)->head;
+		case NIL:
+			fprintf(stderr, "%s", "head(Nil)");
+			[...]
+	}
+}
+\end{lstlisting}

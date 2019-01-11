@@ -58,7 +58,8 @@ Rational Fractional_Constructor(int param0, int param1)
   return rational;
 }
 
-#define instance_fractional(abstr_class)((Fractional*)abstr_class->instance)
+#define instance_fractional(abstr_class)
+	((Fractional*)abstr_class->instance)
 
 \end{lstlisting}
 This section should convince us that you understand how your extension can be
