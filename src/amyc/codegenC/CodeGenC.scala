@@ -53,9 +53,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       // Note: We create the c function name from a combination of
       // module and function name, since we put everything in the same c file.
       val name = if(isMain) "main" else fullName(owner, fd.name)
-      val retOwner = table.getType(fd.retType pe.)
-      val tpe: CType = if (fd.retType.tpe match {case ClassType(_) => true case _ => false}) StructType(owner +"_"+ fd.retType.tpe) else fd.retType.tpe
-      Function(name, fd.params.map(f => new Parameter(f.name, f.tt.tpe, false, owner)), tpe) {
+      //StructType(owner +"_"+ fd.retType.tpe) else fd.retType.tpe
+
+      Function(name, fd.params.map(f => new Parameter(f.name, f.tt.tpe, false, owner)), fd.retType.tpe) {
         val body = cgExpr(fd.body, fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType), owner)
         if (isMain) {
           val (front, last) = body.instructions.splitAt(body.instructions.size-1)
@@ -67,15 +67,13 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
     }
 
     def cgAbstractClass(acd: AbstractClassDef, owner: Identifier): AbstractClass = {
-      val name = fullName(owner, acd.name)
-      AbstractClass(name, table.getConstructorsForType(acd.name).get)
+      AbstractClass(acd.name, table.getConstructorsForType(acd.name).get)
     }
 
     def cgCaseClass(cc: CaseClassDef, owner: Identifier): CaseClass = {
-      val name = fullName(owner, cc.name)
       val tpe = table.getConstructor(cc.name).get.retType
       val index = table.getConstructor(cc.name).get.index
-      CaseClass(name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter("param"+i, f.tt.tpe, false, owner) }, index, tpe.qname)
+      CaseClass(cc.name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter("param"+i, f.tt.tpe, false, owner) }, index, tpe.qname)
     }
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
@@ -86,7 +84,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       })
       if (oneLiner) {
         expr match {
-          case Ite(cond, thenn, elze) => If(cgExpr(cond)) <:> cgExpr(thenn, true) <:> Else <:> cgExpr(elze, true) <:> End
+          case Ite(cond, thenn, elze) => If(cgExpr(cond)(false, module)) <:> cgExpr(thenn, true) <:> Else <:> cgExpr(elze, true) <:> End
           case _ => OneLiner(cgExpr(expr))
         }
       } else {
@@ -143,7 +141,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                   val fun = table.getFunction(qname).get
                   Call(fullName(fun.owner, qname), args.map(cgExpr(_)(false, module)))
                 } else {
-                  Call(fullName(module, qname.name + "_Constructor"), args.map(cgExpr(_)(false, module)))
+                  Call(qname.name + "_Constructor", args.map(cgExpr(_)(false, module)))
                 }
             }
             if (ret) {
@@ -162,7 +160,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
               case Call(name, _, _) if (name == "Std_readInt") =>
                 SetLocal(df.name, df.tt.tpe, Const(0)) <:> Call("scanf", List("%d", GetLocal("&"+df.name)), true) <:> cgExpr(body)
               case Call(name, _, _) if (name.endsWith("Constructor")) =>
-                SetLocal(df.name, StructType(module+"_"+df.tt.tpe), valueCode) <:> cgExpr(body)
+                SetLocal(df.name.name, df.tt.tpe, valueCode) <:> cgExpr(body)
               case _ =>
                 SetLocal(df.name, df.tt.tpe, valueCode) <:> cgExpr(body)
             }
@@ -176,7 +174,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
               case IdPattern(name) =>
                 (True, List(SetLocal(name, tpe, matchingCode)))
               case LiteralPattern(lit) =>
-                (Eq(matchingCode, cgExpr(lit)), List())
+                (Eq(matchingCode, cgExpr(lit)(false, module)), List())
               case CaseClassPattern(con, args) => //matchingCode
                 val c = table.getConstructor(con).get
                 val params: List[(Code, List[Code])] = args.zipWithIndex.zip(c.argTypes).map(pa => matchAndBind(pa._1._1, pa._2)(GetProperty(Call("instance_"+con.name.toLowerCase, List(matchingCode)), GetLocal("param"+pa._1._2))))

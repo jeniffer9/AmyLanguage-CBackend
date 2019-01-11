@@ -78,7 +78,7 @@ object L {
   }}
 
   abstract class LPair
-  case class LP(l1: List, l2: List) extends LPair
+  case class Lp(l1: List, l2: List) extends LPair
 
   def merge(l1: List, l2: List): List = {
     l1 match {
@@ -101,11 +101,11 @@ object L {
       case Cons(h1, Cons(h2, t)) =>
         val rec: LPair = split(t);
         rec match {
-          case LP(rec1, rec2) =>
-            LP(Cons(h1, rec1), Cons(h2, rec2))
+          case Lp(rec1, rec2) =>
+            Lp(Cons(h1, rec1), Cons(h2, rec2))
         }
       case _ =>
-        LP(l, Nil())
+        Lp(l, Nil())
     }
   }
   def mergeSort(l: List): List = {
@@ -114,7 +114,7 @@ object L {
       case Cons(h, Nil()) => l
       case l =>
         split(l) match {
-          case LP(l1, l2) =>
+          case Lp(l1, l2) =>
             merge(mergeSort(l1), mergeSort(l2))
         }
     }
