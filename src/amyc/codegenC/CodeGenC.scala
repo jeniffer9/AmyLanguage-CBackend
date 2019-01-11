@@ -78,8 +78,10 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
     def cgExpr(expr: Expr, firstVoidLine: Boolean = false)(implicit ret: Boolean, module: String): Code = {
-      val oneLiner = firstVoidLine && (expr match {
+      val oneLiner = firstVoidLine && !ret && (expr match {
         case Sequence(_, _) => false
+        case Match(_, _) => false
+        case Error(_) => false
         case _ => true
       })
       if (oneLiner) {
@@ -168,31 +170,36 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
             If(cgExpr(cond)(false, module)) <:> cgExpr(thenn) <:> Else <:> cgExpr(elze) <:> End
           case Match(scrut: Expr, cases: List[MatchCase]) => {
 
-            def matchAndBind(p: Pattern, tpe: CType = CVoid)(implicit matchingCode: Code): (Code, List[Code]) = p match {
+            def matchAndBind(p: Pattern, tpe: CType = CVoid)(implicit matchingCode: Code): (Code, List[Code], List[String]) = p match {
               case WildcardPattern() =>
-                (True, List())
+                (True, List(), List())
               case IdPattern(name) =>
-                (True, List(SetLocal(name, tpe, matchingCode)))
+                if (tpe == CVoid)
+                  (True, List(Define(GetLocal(name), matchingCode)), List(name))
+                else
+                  (True, List(SetLocal(name, tpe, matchingCode)), List())
               case LiteralPattern(lit) =>
-                (Eq(matchingCode, cgExpr(lit)(false, module)), List())
+                (Eq(matchingCode, cgExpr(lit)(false, module)), List(), List())
               case CaseClassPattern(con, args) => //matchingCode
                 val c = table.getConstructor(con).get
-                val params: List[(Code, List[Code])] = args.zipWithIndex.zip(c.argTypes).map(pa => matchAndBind(pa._1._1, pa._2)(GetProperty(Call("instance_"+con.name.toLowerCase, List(matchingCode)), GetLocal("param"+pa._1._2))))
+                val params: List[(Code, List[Code], List[String])] = args.zipWithIndex.zip(c.argTypes).map(pa => matchAndBind(pa._1._1, pa._2)(GetProperty(Call("instance_"+con.name.toLowerCase, List(matchingCode)), GetLocal("param"+pa._1._2))))
                 val paramsConditions: Code = if(params.size>0) params.map(_._1).reduceLeft(And(_, _)) else True
                 val eBody = params.map(_._2).flatten
-                (And(Eq(GetProperty(matchingCode, GetLocal("caseClass")), Const(c.index)), paramsConditions), eBody)
+                (And(Eq(GetProperty(matchingCode, GetLocal("caseClass")), Const(c.index)), paramsConditions), eBody, params.flatMap(_._3))
             }
 
             val scrutCode = cgExpr(scrut)(false, module)
             val matchCode: List[Code] = (cases.zipWithIndex).map(c => {
-              val (cond, body) = matchAndBind(c._1.pat)(scrutCode)
+              val (cond, body, toUndef) = matchAndBind(c._1.pat)(scrutCode)
+              val undefs: Code = if(toUndef.size > 0) toUndef.map(c => i2c(Undefine(c))).reduceLeft(_ <:> _) else List[Code]()
               if (c._2 == 0)
-                If(cond) <:> body <:> cgExpr(c._1.expr, true)
+                If(cond) <:> body <:> cgExpr(c._1.expr, true) <:> undefs
               else
-                ElsIf(cond) <:> body <:> cgExpr(c._1.expr, true)
+                ElsIf(cond) <:> body <:> cgExpr(c._1.expr, true) <:> undefs
                 //i2c(Case(cond, body <:> cgExpr(c.expr)))
             })
-            matchCode.reduceLeft(_ <:> _) <:> End
+            matchCode.reduceLeft(_ <:> _) <:> Else <:> Call("perror", List("match error"), true) <:>
+              Call("exit", List(GetLocal("EXIT_FAILURE")), true) <:>End
           }
           case Error(msg: Expr) =>
             Call("perror", List(cgExpr(msg)(false, module)), true) <:>
