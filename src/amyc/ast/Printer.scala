@@ -36,7 +36,7 @@ trait Printer {
         "abstract class " <:> printName(name)
 
       case CaseClassDef(name, fields, parent) =>
-        def printField(f: TypeTree) = "v: " <:> rec(f)
+        def printField(f: ParamDef) = "v: " <:> rec(f)
         "case class " <:> name <:> "(" <:> Lined(fields map printField, ", ") <:> ") extends " <:> parent
 
       case FunDef(name, params, retType, body) =>
