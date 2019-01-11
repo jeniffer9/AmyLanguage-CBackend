@@ -41,15 +41,11 @@ object ModulePrinter {
   private def mkAbstractClass(ac: AbstractClass): Document = {
     val enumName = ac.name.toUpperCase ++ "_CASE"
     Stacked(
-      Lined(List("typedef enum {",
-        Lined(ac.CaseClasses.map(i => Raw(i.name.toUpperCase)), ", ")
-        , "} ", enumName, ";")
-      ),
       "",
       Lined(List("typedef struct ", ac.name, " {")),
       Indented(Stacked(
         "void* instance;",
-        Lined(List(Raw(enumName), " caseClass;")),
+        Lined(List("int", " caseClass;")),
       )),
       Lined(List("} ", Raw(abstractName(ac.name) + ", "), Raw("*" + ac.name), ";"))
     )
@@ -134,11 +130,15 @@ object ModulePrinter {
         val argos = args.map(mkCode).map(d => Lined(d))
         Lined(Raw("{") :: Lined(argos, ", ") :: List(Raw("}"))) ::
         mkCode(t)
+      case Define(what, to) =>
+        Lined(Raw("#define ") :: mkCode(what) ::: List(Raw(" (")) ::: mkCode(to) ::: List(Raw(")"))) :: mkCode(t)
+      case Undefine(constant) =>
+        Raw("#undef " + constant) :: mkCode(t)
       case SetLocal(_, _, value, _) =>
         Lined(mkInstr(h) :: mkCode(value) ::: List(mkInstr(SemCol))) ::
         mkCode(t)
       case AllocateMem(size) =>
-        Lined(mkInstr(h) :: Raw("(") :: mkCode(size)  ::: List(Raw(")"))) ::
+        Lined(mkInstr(h) :: Raw("(") :: mkCode(size) ::: List(Raw(")"))) ::
         mkCode(t)
       case prefix: Prefix =>
         Lined(mkInstr(h) :: Raw("(") :: mkCode(prefix.body) ::: List(Raw(")"))) ::
@@ -163,7 +163,6 @@ object ModulePrinter {
   private def mkInstr(instr: Instruction): Document = instr match {
     case SetProperty(of, prop, to) => s"$of->$prop = $to;"
     case GetProperty(_, _) => "->"
-    case Define(what, to) => Lined("#define " :: mkCode(what) ::: List(Raw(" ")) ::: mkCode(to))
     case Const(value) => s"$value"
     case Add(_, _) => " + "
     case Sub(_, _) => " - "
