@@ -6,7 +6,7 @@ import c.Instructions.{Call, _}
 import ast.SymbolicTreeModule._
 
 import scala.language.implicitConversions
-// Utilities for CodeGen
+// Utilities for CodeGenC
 object UtilsC {
 
   trait CType
@@ -41,7 +41,7 @@ object UtilsC {
     "stdbool"
   )
 
-  // We don't generate code for these functions in CodeGen (they are hard-coded here or in js wrapper)
+  // We don't generate code for these functions in CodeGenC
   val builtInFunctions: Set[String] = Set(
     "Std_printInt",
     "Std_printString",
