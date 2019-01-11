@@ -1,8 +1,12 @@
 object UnitTest {
 
-  abstract class Bullshit
-  case class BullshitBig(index: Int) extends Bullshit
+  abstract class List
+  case class Nil() extends List
+  case class Cons(head: Int, tail: List) extends List
 
-  val bs: Bullshit = BullshitBig(2);
-  2
+  val l: List = Cons(1, Cons(2, Cons(2, Nil())));
+  l match {
+    case Nil() => 1
+    case Cons(_, _) => 2
+  }
 }

@@ -2,18 +2,20 @@ package amyc.c
 
 import scala.language.implicitConversions
 import amyc.c.Instructions._
+import amyc.codegenC.UtilsC._
 import amyc.utils._
 
 // Printer for C modules
 object ModulePrinter {
   private implicit def s2d(s: String) = Raw(s)
+  private def abstractName(s: String) = "Abstract_" + s
 
   private def mkMod(mod: Module): Document = Stacked(
     Stacked(mod.imports map mkImport),
     Stacked(""),
     Stacked(mod.types map mkAbstractClass),
     Stacked(""),
-    Stacked(mod.classes map mkCaseClass),
+    Stacked(mod.classes map mkCaseClass, true),
     Stacked(""),
     Stacked(mod.functions.dropRight(1) map mkDeclaration),
     Stacked(mod.functions map mkFun)
@@ -37,7 +39,7 @@ object ModulePrinter {
   }
 
   private def mkAbstractClass(ac: AbstractClass): Document = {
-    val enumName = ac.name.toUpperCase
+    val enumName = ac.name.toUpperCase ++ "_CASE"
     Stacked(
       Lined(List("typedef enum {",
         Lined(ac.CaseClasses.map(i => Raw(i.name.toUpperCase)), ", ")
@@ -49,18 +51,32 @@ object ModulePrinter {
         "void* instance;",
         Lined(List(Raw(enumName), " caseClass;")),
       )),
-      Lined(List("} ", Raw(ac.name), ";"))
+      Lined(List("} ", Raw(abstractName(ac.name) + ", "), Raw("*" + ac.name), ";"))
     )
   }
 
   private def mkCaseClass(cc: CaseClass): Document = {
+    val paramNames: List[String] = cc.fields.map(_.name)
+    val valName: String = cc.name.split('_')(1).toLowerCase
+    val tpe: String = cc.owner + "_" + cc.tpe
     Stacked(
       Lined(List("typedef struct ", cc.name, " {")),
       Indented(Stacked(
         //TODO: check when no parameters e.g. Nul case
         cc.fields.map(f => Lined(List(mkParam(f), Raw(";"))))
       )),
-      Lined(List("} ", Raw(cc.name), ";"))
+      Lined(List("} ", Raw(cc.name), ";")),
+      "",
+      mkFun(Function(cc.name + "_Constructor", cc.fields, StructType(tpe)){
+        SetLocal(valName, Pointer(StructType(cc.name)), AllocateMem(GetLocal("sizeof("+cc.name+")"))) <:>
+        cc.fields.map(f => SetProperty(valName, f.name, f.name)) <:> GetLocal("") <:>
+        SetLocal(cc.tpe.toLowerCase, StructType(tpe), AllocateMem(GetLocal("sizeof("+abstractName(tpe)+")"))) <:>
+        SetProperty(cc.tpe.toLowerCase, "instance", valName) <:>
+          SetProperty(cc.tpe.toLowerCase, "caseClass", cc.index.toString) <:>
+          GetLocal("") <:> Return(GetLocal(cc.tpe.toLowerCase))
+      }),
+      "",
+      Raw("#define instance_"+valName+"(abstr_class)(("+Pointer(StructType(tpe))+")abstr_class->instance")
     )
   }
 
@@ -84,7 +100,10 @@ object ModulePrinter {
   }
 
   private def mkParam(param: Parameter): Document = {
-    val tpe = param.tpe.toString
+    val tpeS = param.tpe.toString
+    val tpe = if(param.module != null && (param.tpe match {case StructType(_) => true case _ => false})) //fullName for structs params
+      param.module ++ "_" ++ tpeS
+      else tpeS
     val const = if (param.const) "const " else ""
     Raw(const ++ tpe ++ " " ++ param.name)
   }
@@ -110,7 +129,7 @@ object ModulePrinter {
         val semCol: List[Document] = if (semcol) List(mkInstr(SemCol)) else List("")
         Lined(mkInstr(h) :: Raw("(") :: Lined(parameters, ", ") :: List(Raw(")")) ::: semCol) ::
         mkCode(t)
-      case Constructor(_, args) =>
+      case Constructor(args) =>
         val argos = args.map(mkCode).map(d => Lined(d))
         Lined(Raw("{") :: Lined(argos, ", ") :: List(Raw("}"))) ::
         mkCode(t)
@@ -132,6 +151,9 @@ object ModulePrinter {
       case Seq(c1) =>
         Lined(mkCode(c1) ::: List(mkInstr(SemCol))) ::
         mkCode(t)
+      case Switch(scrut, cases) =>
+        Lined("switch(" :: Lined(mkCode(scrut)) :: List(Raw("){"))) ::
+          cases.map(c => Stacked(mkCode(c))) ::: mkCode(t)
       case _ =>
         mkInstr(h) ::
         mkCode(t)
@@ -139,6 +161,8 @@ object ModulePrinter {
   }
 
   private def mkInstr(instr: Instruction): Document = instr match {
+    case SetProperty(of, prop, to) => s"$of->$prop = $to;"
+    case Case(c) => Lined("case " :: mkCode(c))
     case Const(value) => s"$value"
     case Add(_, _) => " + "
     case Sub(_, _) => " - "

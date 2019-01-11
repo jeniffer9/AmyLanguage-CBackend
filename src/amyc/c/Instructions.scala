@@ -4,7 +4,7 @@ import amyc.codegenC.UtilsC.CType
 
 import scala.language.implicitConversions
 
-// A subset of instructions defined by the WASM standard
+// A subset of instructions defined by the C language
 object Instructions {
   abstract class Instruction
 
@@ -46,7 +46,7 @@ object Instructions {
   case object Else extends Instruction // Marks the end of the implicit 'then' of an if-block
   case object End extends Instruction // Marks the end of an if-then-else or block
   case class Call(name: String, params: List[Code], semcol: Boolean = false) extends Instruction
-  case class Constructor(name: String, tpe: CType, args: List[Code]) extends Instruction
+  case class Constructor(args: List[Code]) extends Instruction
   case class Return(code: Code) extends Instruction
   case class Seq(c1: Code) extends Instruction
 
@@ -54,7 +54,10 @@ object Instructions {
   case class GetLocal(name: String) extends Instruction
   case class SetLocal(name: String, tpe: CType, value: Code, const: Boolean = false) extends Instruction
   case class AllocateMem(size: Code) extends Instruction
+  case class SetProperty(of: String, prop: String, to: String) extends Instruction
   case class OneLiner(c: Code) extends Instruction
+  case class Switch(scrut: Code, cases: List[Code]) extends Instruction
+  case class Case(c: Code) extends Instruction
 
   // Represents a sequence of instructions
   case class Code(instructions: List[Instruction]) {

@@ -1,7 +1,6 @@
 package amyc
 package codegenC
 
-import ast.Identifier
 import c.{Function, Parameter}
 import c.Instructions.{Call, _}
 import ast.SymbolicTreeModule._
@@ -30,10 +29,9 @@ object UtilsC {
     override def toString: String = name
   }
 
-  val memoryBoundary = 0
-
-  // # of global variables
-  val globalsNo = 1
+  case class Pointer(val tpe: CType) extends CType {
+    override def toString: String = s"${tpe.toString}*"
+  }
 
   // The default includes we will pass to a c Module
   val defaultIncludes: List[String] = List(
@@ -54,22 +52,7 @@ object UtilsC {
 
   /** Utilities */
   // A globally unique name for definitions
-  def fullName(owner: Identifier, df: Identifier): String = owner.name + "_" + df.name
-
-  // Given a pointer to an ADT on the top of the stack,
-  // will point at its field in index (and consume the ADT).
-  // 'index' MUST be 0-based.
-  def adtField(index: Int): Code = {
-    Const(4* (index + 1))
-  }
-
-  // A fresh label name
-  def getFreshLabel(name: String = "label") = {
-    Identifier.fresh(name).fullName
-  }
-
-  // Creates a known string constant s in memory
-  def mkString(s: String): Code = ???
+  def fullName(owner: String, df: String): String = owner + "_" + df
 
   // Built-in implementation of concatenation
   val concatImpl: Function = {
@@ -155,5 +138,4 @@ object UtilsC {
     case _ => CStringType
   }
   implicit def s2is(s: String): Code = Strng(s)
-
 }
