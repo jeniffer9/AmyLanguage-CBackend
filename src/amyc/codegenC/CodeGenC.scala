@@ -73,9 +73,8 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       val name = fullName(owner, cc.name)
       val tpe = table.getConstructor(cc.name).get.retType
       val index = table.getConstructor(cc.name).get.index
-      CaseClass(name, owner, cc.fields.zipWithIndex.map{case (f,i) => new Parameter("field" + i, f.tpe, false, owner)}, index, tpe.qname)
+      CaseClass(name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter(f.name, f.tt.tpe, false, owner) }, index, tpe.qname)
     }
-
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
     def cgExpr(expr: Expr, firstVoidLine: Boolean = false)(implicit ret: Boolean, module: String): Code = {

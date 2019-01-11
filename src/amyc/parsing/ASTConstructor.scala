@@ -51,7 +51,7 @@ class ASTConstructor {
       case Node('CaseClassDef ::= _, List(Leaf(cse), _, name, _, params, _, _, parent)) =>
         CaseClassDef(
           constructName(name)._1,
-          constructList(params, constructParam, hasComma = true).map(_.tt),
+          constructList(params, constructParam, hasComma = true).map(p => ParamDef(p.name, p.tt)),
           constructName(parent)._1
         ).setPos(cse)
       case Node('FunDef ::= _, List(Leaf(df), name, _, params, _, _, retType, _, _, body, _)) =>

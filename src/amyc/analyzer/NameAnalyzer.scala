@@ -70,7 +70,7 @@ object NameAnalyzer extends Pipeline[N.Program, (S.Program, SymbolTable)] {
           if (par == None) {
             fatal(s"Must extend type from same module", c.position)
           }
-          table.addConstructor(mod.name, name, fields.map(n => transformType(n, mod.name)), par.get)
+          table.addConstructor(mod.name, name, fields.map(n => transformType(n.tt, mod.name)), par.get)
         case _ =>
       }
     }
@@ -102,10 +102,11 @@ object NameAnalyzer extends Pipeline[N.Program, (S.Program, SymbolTable)] {
       case N.AbstractClassDef(name) =>
         val Some(sym) = table.getType(module, name)
         S.AbstractClassDef(sym)
-      case N.CaseClassDef(name, fields, _) =>
+      case pd@N.CaseClassDef(name, fields, _) =>
         val Some((sym, sig)) = table.getConstructor(module, name)
-        val newArgs = fields zip sig.argTypes map { case (tt, tpe) =>
-          S.TypeTree(tpe).setPos(tt)
+        val newArgs = fields zip sig.argTypes map { case (param, tpe) =>
+          val n = Identifier.fresh(param.name)
+          S.ParamDef(n, S.TypeTree(tpe).setPos(param)).setPos(pd)
         }
         S.CaseClassDef(sym, newArgs, sig.parent)
       case fd: N.FunDef =>
