@@ -3,20 +3,63 @@ with it. Make sure you include examples where the most intricate features of
 your extension are used, so that we have an immediate understanding of what the
 challenges are.
 
-You can pretty-print tool code like this:
+%You can pretty-print tool code like this:
+%\begin{lstlisting}
+%object {
+%  def main() : Unit = { println(new A().foo(-41)); }
+%}
+%
+%class A {
+%  def foo(i : Int) : Int = {
+%    var j : Int;
+%    if(i < 0) { j = 0 - i; } else { j = i; }
+%    return j + 1;
+%  }
+%}
+%\end{lstlisting}
+
 \begin{lstlisting}
-object {
-  def main() : Unit = { println(new A().foo(-41)); }
+Amy:
+object Hello {
+  Std.printString("Hello " ++ "world!")
 }
 
-class A {
-  def foo(i : Int) : Int = {
-    var j : Int;
-    if(i < 0) { j = 0 - i; } else { j = i; }
-    return j + 1;
-  }
+becomes in C:
+#include <stdio.h>
+#include "std.h"
+
+int Hello_main() {
+  Std_printString(String_concat("Hello ", "world!"));
+  return 0;
 }
 \end{lstlisting}
 
+\begin{lstlisting}
+One line of Amy code can generate a lot of C Code
+
+case class Fractional(num: Int, denom: Int) extends Rational
+
+becomes in C:
+typedef struct Fractional {
+  int param0; // numerator
+  int param1; // denominator
+} Fractional;
+
+Rational Fractional_Constructor(int param0, int param1) 
+{
+  Fractional* fractional = malloc(sizeof(Fractional));
+  fractional->param0 = param0;
+  fractional->param1 = param1;
+
+  Rational rational = malloc(sizeof(Abstract_Rational));
+  rational->instance = fractional;
+  rational->caseClass = 1;
+
+  return rational;
+}
+
+#define instance_fractional(abstr_class)((Fractional*)abstr_class->instance)
+
+\end{lstlisting}
 This section should convince us that you understand how your extension can be
 useful and that you thought about the corner cases.
