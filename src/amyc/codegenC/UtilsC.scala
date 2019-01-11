@@ -120,8 +120,8 @@ object UtilsC {
     val local1 = "string"
 
     Function("Std_readString", List(), CStringType) {
-      SetLocal(local1, CStringType, AllocateMem(Const(5000))) <:>
-        Call("scanf", List("%s", GetLocal(local1)), true) <:>
+      SetLocal(local1, CStringType, AllocateMem(Const(4096))) <:>
+        Call("fgets", List(GetLocal(local1), Const(4096), GetLocal("stdin")), true) <:>
         Return(GetLocal(local1))
     }
   }
