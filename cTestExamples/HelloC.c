@@ -47,11 +47,6 @@ L_List l_list_cons(int head, L_List tail)
 
 #define inst_cons(l)    ((Cons *)l->instance)
 
-//int head(L_List l)
-//{
-	//return (Cons *)l.instance)->head;
-//}
-
 //----------------------------------------------
 // Case Class: Nil
 typedef struct Nil {} Nil;
@@ -68,11 +63,6 @@ L_List l_list_nil()
 
 #define inst_nil()    ((Nil *)l->instance)
 
-//~ Nil* inst_nil(L_List l)
-//~ {
-	//~ return (Nil *)l.instance;
-//~ }
-
 //----------------------------------------------
 //----------------------------------------------
 int head(L_List l) 
@@ -88,6 +78,7 @@ int head(L_List l)
 	}
 }
 
+//----------------------------------------------
 //----------------------------------------------
 
 //def head(l: List): Int = {
@@ -141,7 +132,7 @@ int head(L_List l)
   
 //----------------------------------------------
 //----------------------------------------------
-// L.List: Case Classes
+// L.LPair: Case Classes
 
 typedef enum {LP_c} L_LPAIR;
 
@@ -150,7 +141,7 @@ typedef enum {LP_c} L_LPAIR;
 typedef struct L_LPair {
 	void* instance;
 	L_LPAIR caseClass;
-} AbstractClass_L_LPair, *L_LPair; // Object, then pointer to object
+} AbstractClass_L_LPair, *L_LPair;
 
 //----------------------------------------------
 // Case Class: LP
@@ -174,7 +165,9 @@ L_LPair l_lpair_lp(L_List l1, L_List l2)
 }
 
 #define inst_lp(l)    ((LP *)l->instance)
-  
+ 
+//----------------------------------------------
+//----------------------------------------------
 L_List merge(L_List l1, L_List l2)
 {
 	switch(l1->caseClass) {
@@ -253,8 +246,6 @@ L_List mergeSort(L_List l)
 //----------------------------------------------
 //----------------------------------------------
 
-
-
 int main()
 {
 	// val l_good: L.List = Cons(2, Nil()) translates to
@@ -270,25 +261,6 @@ int main()
 	L_List m = mergeSort(good);
 	printf("%d\n", head(m));
 	printf("%d\n", head((inst_cons(good))->tail));
-	
-	//~ Nil n0 = {};
-	//~ L_List l0 = {&n0, NIL};
-	
-	//~ Cons c1 = {4, l0};
-	//~ L_List l1 = {&c1, CONS};
-	//void* cp= &c;
-	//L_List l = {&c};//malloc(sizeof(List));
-	//l.instance = cp;
-	//l.caseClass = CONS;
-	
-	
-	
-	//if(l1.caseClass == CONS) {
-		//if(((Cons *)l1.instance)->head == 4) {
-			//printf("Bitch, please");
-		//}
-	//}
-	
 	
 	
 	return 0;
