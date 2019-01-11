@@ -1,0 +1,77 @@
+\subsection{Standard Library}
+
+The std is included with every document (C file) and brings over some standard Amy functionality.
+
+
+\begin{lstlisting}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+char* String_concat(const char* s1, const char* s2);
+void Std_printString(char* string);
+void Std_printInt(int integer);
+char* Std_digitToString(int digit);
+void Std_printBoolean(bool b);
+char* Std_intToString(int i);
+char* Std_booleanToString(bool b);
+
+char* String_concat(const char* s1, const char* s2) 
+{
+  const size_t len1 = strlen(s1);
+  const size_t len2 = strlen(s2);
+  char* result = malloc(len1 + len2 + 1);
+  memcpy(result, s1, len1);
+  memcpy(result + len1, s2, len2 + 1);
+  return result;
+}
+
+void Std_printString(char* string) 
+{
+  printf("%s\n", string);
+}
+
+void Std_printInt(int integer) 
+{
+  printf("%d\n", integer);
+}
+
+char* Std_digitToString(int digit) 
+{
+  char* string = malloc(sizeof(int));
+  sprintf(string, "%d", digit);
+  return string;
+}
+
+void Std_printBoolean(bool b) 
+{
+  Std_printString(Std_booleanToString(b));
+}
+
+char* Std_intToString(int i) 
+{
+  if (i < 0) {
+    return String_concat("-", Std_intToString(-(i)));
+  } else {
+    int rem = i % 10;
+    int div = i / 10;
+    if (div == 0) {
+      return Std_digitToString(rem);
+    } else {
+      return String_concat(Std_intToString(div), 
+      	Std_digitToString(rem));
+    }
+  }
+}
+
+char* Std_booleanToString(bool b) 
+{
+  if (b) {
+    return "true";
+  } else {
+    return "false";
+  }
+}
+
+\end{lstlisting}

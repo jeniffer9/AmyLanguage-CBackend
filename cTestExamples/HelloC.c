@@ -1,6 +1,71 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
+char* String_concat(const char* s1, const char* s2);
+void Std_printString(char* string);
+void Std_printInt(int integer);
+char* Std_digitToString(int digit);
+void Std_printBoolean(bool b);
+char* Std_intToString(int i);
+char* Std_booleanToString(bool b);
+
+char* String_concat(const char* s1, const char* s2) 
+{
+  const size_t len1 = strlen(s1);
+  const size_t len2 = strlen(s2);
+  char* result = malloc(len1 + len2 + 1);
+  memcpy(result, s1, len1);
+  memcpy(result + len1, s2, len2 + 1);
+  return result;
+}
+
+void Std_printString(char* string) 
+{
+  printf("%s\n", string);
+}
+
+void Std_printInt(int integer) 
+{
+  printf("%d\n", integer);
+}
+
+char* Std_digitToString(int digit) 
+{
+  char* string = malloc(sizeof(int));
+  sprintf(string, "%d", digit);
+  return string;
+}
+
+void Std_printBoolean(bool b) 
+{
+  Std_printString(Std_booleanToString(b));
+}
+
+char* Std_intToString(int i) 
+{
+  if (i < 0) {
+    return String_concat("-", Std_intToString(-(i)));
+  } else {
+    int rem = i % 10;
+    int div = i / 10;
+    if (div == 0) {
+      return Std_digitToString(rem);
+    } else {
+      return String_concat(Std_intToString(div), Std_digitToString(rem));
+    }
+  }
+}
+
+char* Std_booleanToString(bool b) 
+{
+  if (b) {
+    return "true";
+  } else {
+    return "false";
+  }
+}
 
 //----------------------------------------------
 //----------------------------------------------
@@ -129,6 +194,11 @@ int head(L_List l)
     //}
   //}
   
+  //def toString1(l : List): String = { l match {
+    //case Cons(h, Nil()) => Std.intToString(h)
+    //case Cons(h, t) => Std.intToString(h) ++ ", " ++ toString1(t)
+  //}}
+  
   
 //----------------------------------------------
 //----------------------------------------------
@@ -242,6 +312,24 @@ L_List mergeSort(L_List l)
 		}
 	}
 }
+
+char* toString(L_List l)
+{
+	switch(l->caseClass) {
+		case CONS: {
+			int h = inst_cons(l)->head;
+			L_List t = inst_cons(l)->tail;
+			if(t->caseClass == NIL) {
+				return Std_intToString(h); 
+			} else {
+				return String_concat(Std_intToString(h), String_concat(", ", toString(t)));
+			}
+		}
+		default:
+			printf("Error");
+			return NULL;
+	}
+}
   
 //----------------------------------------------
 //----------------------------------------------
@@ -249,19 +337,25 @@ L_List mergeSort(L_List l)
 int main()
 {
 	// val l_good: L.List = Cons(2, Nil()) translates to
-	L_List good = l_list_cons(8, l_list_cons(6, l_list_cons(2, l_list_nil())));
-	L_List t = ((inst_cons(good))->tail);
+	L_List good = l_list_cons(8, l_list_cons(6, l_list_cons(42, l_list_cons(2, l_list_nil()))));
+	//L_List t = ((inst_cons(good))->tail);
 	printf("%d\n", head(good));
-	printf("%d test \n", head(t));
+	//printf("%d test \n", head(t));
 	
-	L_List bad = l_list_nil();
-	printf("%d\n", head(bad));
-		
+	//L_List bad = l_list_nil();
+	//printf("%d\n", head(bad));
+	
+	printf("Before Sort:\n");
+	char* theList0 = toString(good);
+	Std_printString(theList0);
+	
 	printf("Merge Sort Baby!\n");
 	L_List m = mergeSort(good);
-	printf("%d\n", head(m));
-	printf("%d\n", head((inst_cons(good))->tail));
+	// printf("%d\n", head(m));
+	// printf("%d\n", head((inst_cons(good))->tail));
 	
+	char* theList = toString(m);
+	Std_printString(theList);
 	
 	return 0;
 }
