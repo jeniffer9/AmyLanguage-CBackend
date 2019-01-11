@@ -157,10 +157,6 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
           case Let(df, value: Expr, body: Expr) =>
             val valueCode = cgExpr(value)(false, module)
             valueCode.instructions.head match {
-              case Call(name, _, _) if (name == "Std_readString") =>
-                SetLocal(df.name, df.tt.tpe, AllocateMem(Const(5000))) <:> Call("scanf", List("%s", GetLocal(df.name)), true) <:> cgExpr(body)
-              case Call(name, _, _) if (name == "Std_readInt") =>
-                SetLocal(df.name, df.tt.tpe, Const(0)) <:> Call("scanf", List("%d", GetLocal("&"+df.name)), true) <:> cgExpr(body)
               case Call(name, _, _) if (name.endsWith("Constructor")) =>
                 SetLocal(df.name.name, df.tt.tpe, valueCode) <:> cgExpr(body)
               case _ =>
