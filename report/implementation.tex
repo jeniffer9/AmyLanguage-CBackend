@@ -32,7 +32,11 @@ The abstract class implements the equivalent to a type by creating a struct with
 it's "abstract name" - which consists simply by adding "Abstract_" in front of it - and then simutaneously creating a pointer
 which is being used whenever make use of the type.
 
-CaseClass:
+CaseClass: (takes: name, list of it's fields, case index, type)
+We are here making use of the individual index assigned to each constructor for each type
+Basicaly, every time we call a constructor, the C code calls the associated constructor which does all the work for us and
+just returns the right type struct containing a pointer to aninstance of the actual CaseClass and a caseClass field containing
+the index which will be very useful when implementing the pattern matching.
 
 The hardest part was finding a working and readable substitution for Amy's abstract and case class (which extend the abstract class) functionality.
 How can we have "generics" and "inheritance" in C: that seemed like an impossible challenge.
