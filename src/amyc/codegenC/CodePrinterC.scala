@@ -1,6 +1,6 @@
 package amyc.codegenC
 
-import java.io.{File, IOException}
+import java.io.{File}
 
 import amyc.c.Module
 import amyc.utils.{Context, Env, Pipeline}
