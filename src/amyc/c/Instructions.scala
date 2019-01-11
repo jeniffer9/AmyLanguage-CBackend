@@ -50,6 +50,7 @@ object Instructions {
   case class Return(code: Code) extends Instruction
   case class Seq(c1: Code) extends Instruction
   case class Define(what: Code, to: Code) extends Instruction
+  case class Undefine(constant: String) extends Instruction
   case class ElsIf(cond: Code) extends Instruction
 
   // Locals (parameters, local variables)
