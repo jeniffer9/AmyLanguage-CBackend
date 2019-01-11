@@ -111,22 +111,32 @@ object UtilsC {
 
     Function("Std_digitToString", List(param), CStringType) {
       SetLocal(local2, CStringType, AllocateMem(Call("sizeof", List(GetLocal("int"))))) <:>
-      Call("sprintf", List(GetLocal(local2), paramDigit, GetLocal(local1)), true) <:>
+      Call("printf", List(GetLocal(local2), paramDigit, GetLocal(local1)), true) <:>
       Return(GetLocal(local2))
     }
   }
 
   val readStringImpl: Function = {
-    val paramString = "%s"
     val local1 = "string"
-    val param = new Parameter(local1, CStringType)
 
-    Function("Std_readString", List(param), CVoid) {
-      Call("printf", List(paramString, GetLocal(local1)), true)
+    Function("Std_readString", List(), CStringType) {
+      SetLocal(local1, CStringType, AllocateMem(Const(5000))) <:>
+        Call("scanf", List("%s", GetLocal(local1)), true) <:>
+        Return(GetLocal(local1))
     }
   }
 
-  val cFunctions = List(concatImpl, printStringImpl, printIntImpl, digitToStringImpl, readStringImpl)
+  val readIntImpl: Function = {
+    val local1 = "integer"
+
+    Function("Std_readInt", List(), CIntType) {
+      SetLocal(local1, CIntType, Const(0)) <:>
+        Call("scanf", List("%d", GetLocal("&"+local1)), true) <:>
+        Return(GetLocal(local1))
+    }
+  }
+
+  val cFunctions = List(concatImpl, printStringImpl, printIntImpl, digitToStringImpl, readStringImpl, readIntImpl)
 
   implicit def toCArgs(args: List[ParamDef]): List[Parameter] = args.map(a => new Parameter(a.name, a.tt.tpe))
   implicit def i2s(i: Name): String = i.name
