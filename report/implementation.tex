@@ -24,6 +24,16 @@ For the Case Classes we check that it's the same Class for the given type and th
 %After reading this section, we should be convinced that you knew what you were
 %doing when you wrote your extension, and that you put some extra consideration
 %for the harder parts.
+In a separate package called "c" we basically define all the elements that were also defined in the webAssembly code generation; Function, Instructions, Module and ModulePrinter.
+Additionally we added an AbstractClass and a CaseClass, inspired from the Function file and that are used to correctly implement an alternative to types and classes in C.
+
+AbstractClass: (takes the typeName as parameter)
+The abstract class implements the equivalent to a type by creating a struct with the defined type name, typedefing it to
+it's "abstract name" - which consists simply by adding "Abstract_" in front of it - and then simutaneously creating a pointer
+which is being used whenever make use of the type.
+
+CaseClass:
+
 The hardest part was finding a working and readable substitution for Amy's abstract and case class (which extend the abstract class) functionality.
 How can we have "generics" and "inheritance" in C: that seemed like an impossible challenge.
 So we contemplated on how to achieve this and sat down and tried to come up with ways
