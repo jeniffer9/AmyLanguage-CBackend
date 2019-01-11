@@ -7,6 +7,6 @@ object UnitTest {
   val l: List = Cons(1, Cons(2, Cons(2, Nil())));
   l match {
     case Nil() => 1
-    case Cons(_, _) => 2
+    case Cons(h, _) => 2
   }
 }

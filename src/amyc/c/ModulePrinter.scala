@@ -76,7 +76,7 @@ object ModulePrinter {
           GetLocal("") <:> Return(GetLocal(cc.tpe.toLowerCase))
       }),
       "",
-      Raw("#define instance_"+valName+"(abstr_class)(("+Pointer(StructType(tpe))+")abstr_class->instance")
+      Raw("#define instance_"+valName+"(abstr_class)(("+Pointer(StructType(cc.name))+")abstr_class->instance)")
     )
   }
 
@@ -115,12 +115,17 @@ object ModulePrinter {
       case OneLiner(c) =>
         Lined(mkCode(c) ::: List(mkInstr(SemCol))) ::
         mkCode(t)
+      case Case(cond, body) =>
+        mkCode(If(cond)) ::: mkCode(body) ::: List(Raw("}")) ::: mkCode(t)
       case If(_) =>
         mkInstr(h) ::
           (mkCode(t) map Indented)
       case Else =>
         Unindented(mkInstr(h)) ::
         mkCode(t)
+      case ElsIf(_) =>
+        Unindented(mkInstr(h)) ::
+          (mkCode(t))
       case End =>
         Unindented(mkInstr(h)) ::
         (mkCode(t) map Unindented)
@@ -151,9 +156,8 @@ object ModulePrinter {
       case Seq(c1) =>
         Lined(mkCode(c1) ::: List(mkInstr(SemCol))) ::
         mkCode(t)
-      case Switch(scrut, cases) =>
-        Lined("switch(" :: Lined(mkCode(scrut)) :: List(Raw("){"))) ::
-          cases.map(c => Stacked(mkCode(c))) ::: mkCode(t)
+      case GetProperty(of, prop) =>
+        Lined(mkCode(of) ::: List(mkInstr(h)) ::: mkCode(prop)) :: mkCode(t)
       case _ =>
         mkInstr(h) ::
         mkCode(t)
@@ -162,7 +166,7 @@ object ModulePrinter {
 
   private def mkInstr(instr: Instruction): Document = instr match {
     case SetProperty(of, prop, to) => s"$of->$prop = $to;"
-    case Case(c) => Lined("case " :: mkCode(c))
+    case GetProperty(_, _) => "->"
     case Const(value) => s"$value"
     case Add(_, _) => " + "
     case Sub(_, _) => " - "
@@ -177,6 +181,7 @@ object ModulePrinter {
     case Not(_) => "!"
     case Neg(_) => "-"
     case If(cond) => Lined(Raw("if (") :: mkCode(cond) ::: List(Raw(") {")))
+    case ElsIf(cond) => Lined(Raw("} else if (") :: mkCode(cond) ::: List(Raw(") {")))
     case Else => "} else {"
     case Return(_) => "return "
     case End => "}"

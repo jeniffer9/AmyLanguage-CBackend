@@ -53,7 +53,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       // Note: We create the c function name from a combination of
       // module and function name, since we put everything in the same c file.
       val name = if(isMain) "main" else fullName(owner, fd.name)
-      Function(name, fd.params, fd.retType.tpe) {
+      val retOwner = table.getType(fd.retType pe.)
+      val tpe: CType = if (fd.retType.tpe match {case ClassType(_) => true case _ => false}) StructType(owner +"_"+ fd.retType.tpe) else fd.retType.tpe
+      Function(name, fd.params.map(f => new Parameter(f.name, f.tt.tpe, false, owner)), tpe) {
         val body = cgExpr(fd.body, fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType), owner)
         if (isMain) {
           val (front, last) = body.instructions.splitAt(body.instructions.size-1)
@@ -73,7 +75,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       val name = fullName(owner, cc.name)
       val tpe = table.getConstructor(cc.name).get.retType
       val index = table.getConstructor(cc.name).get.index
-      CaseClass(name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter(f.name, f.tt.tpe, false, owner) }, index, tpe.qname)
+      CaseClass(name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter("param"+i, f.tt.tpe, false, owner) }, index, tpe.qname)
     }
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
@@ -167,22 +169,32 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
           case Ite(cond: Expr, thenn: Expr, elze: Expr) =>
             If(cgExpr(cond)(false, module)) <:> cgExpr(thenn) <:> Else <:> cgExpr(elze) <:> End
           case Match(scrut: Expr, cases: List[MatchCase]) => {
-            def matchAndBind(p: Pattern): Code = p match {
-              case WildcardPattern() => Const(1)
-              case IdPattern(name) => ???
-              ///(SetLocal(newLoco) <:> Const(1) ,Map(name -> newLoco))
-              case LiteralPattern(lit) => ???
-              //cgExpr(lit) <:> Eq, Map())
-              case CaseClassPattern(con, args) => Case(GetLocal(con.name.toUpperCase))
 
+            def matchAndBind(p: Pattern, tpe: CType = CVoid)(implicit matchingCode: Code): (Code, List[Code]) = p match {
+              case WildcardPattern() =>
+                (True, List())
+              case IdPattern(name) =>
+                (True, List(SetLocal(name, tpe, matchingCode)))
+              case LiteralPattern(lit) =>
+                (Eq(matchingCode, cgExpr(lit)), List())
+              case CaseClassPattern(con, args) => //matchingCode
+                val c = table.getConstructor(con).get
+                val params: List[(Code, List[Code])] = args.zipWithIndex.zip(c.argTypes).map(pa => matchAndBind(pa._1._1, pa._2)(GetProperty(Call("instance_"+con.name.toLowerCase, List(matchingCode)), GetLocal("param"+pa._1._2))))
+                val paramsConditions: Code = if(params.size>0) params.map(_._1).reduceLeft(And(_, _)) else True
+                val eBody = params.map(_._2).flatten
+                (And(Eq(GetProperty(matchingCode, GetLocal("caseClass")), Const(c.index)), paramsConditions), eBody)
             }
 
-            val scrutCode = cgExpr(scrut)
-            val matchCode = cases.map(c => {
-              val code = matchAndBind(c.pat)
-                code
+            val scrutCode = cgExpr(scrut)(false, module)
+            val matchCode: List[Code] = (cases.zipWithIndex).map(c => {
+              val (cond, body) = matchAndBind(c._1.pat)(scrutCode)
+              if (c._2 == 0)
+                If(cond) <:> body <:> cgExpr(c._1.expr, true)
+              else
+                ElsIf(cond) <:> body <:> cgExpr(c._1.expr, true)
+                //i2c(Case(cond, body <:> cgExpr(c.expr)))
             })
-            Switch(scrutCode, matchCode)
+            matchCode.reduceLeft(_ <:> _) <:> End
           }
           case Error(msg: Expr) =>
             Call("perror", List(cgExpr(msg)(false, module)), true) <:>
