@@ -126,7 +126,7 @@ object UtilsC {
     }
   }
 
-  val cFunctions = List(concatImpl, printStringImpl, printIntImpl, digitToStringImpl)/*List(concatImpl, digitToStringImpl, readStringImpl)*/
+  val cFunctions = List(concatImpl, printStringImpl, printIntImpl, digitToStringImpl, readStringImpl)
 
   implicit def toCArgs(args: List[ParamDef]): List[Parameter] = args.map(a => new Parameter(a.name, a.tt.tpe))
   implicit def i2s(i: Name): String = i.name

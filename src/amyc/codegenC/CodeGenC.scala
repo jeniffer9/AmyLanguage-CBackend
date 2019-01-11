@@ -73,7 +73,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
     def cgCaseClass(cc: CaseClassDef, owner: Identifier): CaseClass = {
       val tpe = table.getConstructor(cc.name).get.retType
       val index = table.getConstructor(cc.name).get.index
-      CaseClass(cc.name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter("param"+i, f.tt.tpe, false, owner) }, index, tpe.qname)
+      CaseClass(cc.name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter("field"+i, f.tt.tpe, false, owner) }, index, tpe.qname)
     }
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
@@ -153,7 +153,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
             }
 
           case Sequence(e1: Expr, e2: Expr) =>
-            Seq(cgExpr(e1)(false, module)) <:> cgExpr(e2)
+            Seq(cgExpr(e1)(false, module)) <:> cgExpr(e2, firstVoidLine)
           case Let(df, value: Expr, body: Expr) =>
             val valueCode = cgExpr(value)(false, module)
             valueCode.instructions.head match {
@@ -182,7 +182,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                 (Eq(matchingCode, cgExpr(lit)(false, module)), List(), List())
               case CaseClassPattern(con, args) => //matchingCode
                 val c = table.getConstructor(con).get
-                val params: List[(Code, List[Code], List[String])] = args.zipWithIndex.zip(c.argTypes).map(pa => matchAndBind(pa._1._1, pa._2)(GetProperty(Call("instance_"+con.name.toLowerCase, List(matchingCode)), GetLocal("param"+pa._1._2))))
+                val params: List[(Code, List[Code], List[String])] = args.zipWithIndex.zip(c.argTypes).map(pa => matchAndBind(pa._1._1, pa._2)(GetProperty(Call("instance_"+con.name.toLowerCase, List(matchingCode)), GetLocal("field"+pa._1._2))))
                 val paramsConditions: Code = if(params.size>0) params.map(_._1).reduceLeft(And(_, _)) else True
                 val eBody = params.map(_._2).flatten
                 (And(Eq(GetProperty(matchingCode, GetLocal("caseClass")), Const(c.index)), paramsConditions), eBody, params.flatMap(_._3))
