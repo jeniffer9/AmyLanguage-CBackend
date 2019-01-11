@@ -5,7 +5,6 @@
 //----------------------------------------------
 //----------------------------------------------
 // L.List: Case Classes
-//typedef struct L_List* L_List;
 
 typedef enum {NIL, CONS} L_LIST;
 
@@ -30,7 +29,7 @@ L_List l_list_cons(int head, L_List tail)
     cons->head = head;
     cons->tail = tail;
 	
-	L_List l_list = malloc(sizeof(L_List));
+	L_List l_list = malloc(sizeof(AbstractClass_L_List));
     l_list->instance = cons;
     l_list->caseClass = CONS;
     
@@ -114,6 +113,68 @@ int head(L_List l)
     //}
   //}
   
+  //def split(l: List): LPair = {
+    //l match {
+      //case Cons(h1, Cons(h2, t)) =>
+        //val rec: LPair = split(t);
+        //rec match {
+          //case LP(rec1, rec2) =>
+            //LP(Cons(h1, rec1), Cons(h2, rec2))
+        //}
+      //case _ =>
+        //LP(l, Nil())
+    //}
+  //}
+  
+  //def mergeSort(l: List): List = {
+    //l match {
+      //case Nil() => l
+      //case Cons(h, Nil()) => l
+      //case l =>
+        //split(l) match {
+          //case LP(l1, l2) =>
+            //merge(mergeSort(l1), mergeSort(l2))
+        //}
+    //}
+  //}
+  
+  
+//----------------------------------------------
+//----------------------------------------------
+// L.List: Case Classes
+
+typedef enum {LP_c} L_LPAIR;
+
+//----------------------------------------------
+// Abstract Class: L.LPair
+typedef struct L_LPair {
+	void* instance;
+	L_LPAIR caseClass;
+} AbstractClass_L_LPair, *L_LPair; // Object, then pointer to object
+
+//----------------------------------------------
+// Case Class: LP
+typedef struct LP {
+	L_List l1;
+	L_List l2;
+} LP;
+
+// Case class constructor
+L_LPair l_lpair_lp(L_List l1, L_List l2) 
+{
+	LP* lp = malloc(sizeof(LP));
+    lp->l1 = l1;
+    lp->l2 = l2;
+	
+	L_LPair l_lpair = malloc(sizeof(AbstractClass_L_LPair));
+    l_lpair->instance = lp;
+    l_lpair->caseClass = LP_c;
+    
+	return l_lpair;
+}
+
+#define inst_lp(l)    ((LP *)l->instance)
+  
 L_List merge(L_List l1, L_List l2)
 {
 	switch(l1->caseClass) {
@@ -136,7 +197,56 @@ L_List merge(L_List l1, L_List l2)
 				}
 			}
 		}
-		
+	}
+}
+
+L_LPair split(L_List l)
+{
+	switch(l->caseClass) {
+		case CONS: {
+			int h1 = inst_cons(l)->head;
+			L_List t1 = inst_cons(l)->tail;
+			if(t1->caseClass == CONS) {
+				int h2 = inst_cons(inst_cons(l)->tail)->head;
+				L_List t = inst_cons(inst_cons(l)->tail)->tail;
+				L_LPair rec = split(t);
+				switch(rec->caseClass) {
+					case LP_c: {
+						L_List rec1 = inst_lp(rec)->l1;
+						L_List rec2 = inst_lp(rec)->l2;
+						return l_lpair_lp(l_list_cons(h1, rec1), l_list_cons(h2, rec2));
+					}
+				}
+			} else {
+				return l_lpair_lp(l, l_list_nil());
+			}
+		}
+		default:
+			return l_lpair_lp(l, l_list_nil());
+	}
+}
+
+L_List mergeSort(L_List l)
+{
+	switch(l->caseClass) {
+		case NIL:
+			return l;
+		case CONS: {
+			//int h = inst_cons(l)->head;
+			L_List t = inst_cons(l)->tail;
+			if(t->caseClass == NIL) {
+				return l;
+			} else {
+				L_LPair lp2 = split(l);
+				switch(lp2->caseClass) {
+					case LP_c: {
+						L_List l1 = inst_lp(lp2)->l1;
+						L_List l2 = inst_lp(lp2)->l2;
+						return merge(mergeSort(l1), mergeSort(l2));
+					}
+				}
+			}
+		}
 	}
 }
   
@@ -155,8 +265,11 @@ int main()
 	
 	L_List bad = l_list_nil();
 	printf("%d\n", head(bad));
-	
-	printf("%d\n", head(merge(good, bad)));
+		
+	printf("Merge Sort Baby!\n");
+	L_List m = mergeSort(good);
+	printf("%d\n", head(m));
+	printf("%d\n", head((inst_cons(good))->tail));
 	
 	//~ Nil n0 = {};
 	//~ L_List l0 = {&n0, NIL};
