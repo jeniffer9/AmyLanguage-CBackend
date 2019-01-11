@@ -18,10 +18,10 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
     val (program, table) = v
 
     def cgTypes(moduleDef: ModuleDef): List[AbstractClass] = {
-      val ModuleDef(name, defs, _) = moduleDef
+      val ModuleDef(_, defs, _) = moduleDef
       // Generate code for all functions
       defs.collect {
-        case acd: AbstractClassDef => cgAbstractClass(acd, name)
+        case acd: AbstractClassDef => cgAbstractClass(acd)
       }
     }
 
@@ -55,30 +55,30 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       val name = if(isMain) "main" else fullName(owner, fd.name)
       //StructType(owner +"_"+ fd.retType.tpe) else fd.retType.tpe
 
-      Function(name, fd.params.map(f => new Parameter(f.name, f.tt.tpe, false, owner)), fd.retType.tpe) {
-        val body = cgExpr(fd.body, fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType), owner)
+      Function(name, fd.params.map(f => new Parameter(f.name, f.tt.tpe, false)), fd.retType.tpe) {
+        val body = cgExpr(fd.body, fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType))
         if (isMain) {
-          val (front, last) = body.instructions.splitAt(body.instructions.size-1)
-          front <:> Seq(last) <:> Return(Const(0))
+          body <:>
+            Return(Const(0))
         } else {
           body
         }
       }
     }
 
-    def cgAbstractClass(acd: AbstractClassDef, owner: Identifier): AbstractClass = {
-      AbstractClass(acd.name, table.getConstructorsForType(acd.name).get)
+    def cgAbstractClass(acd: AbstractClassDef): AbstractClass = {
+      AbstractClass(acd.name)
     }
 
     def cgCaseClass(cc: CaseClassDef, owner: Identifier): CaseClass = {
       val tpe = table.getConstructor(cc.name).get.retType
       val index = table.getConstructor(cc.name).get.index
-      CaseClass(cc.name, owner, cc.fields.zipWithIndex.map { case (f, i) => new Parameter("field"+i, f.tt.tpe, false, owner) }, index, tpe.qname)
+      CaseClass(cc.name, cc.fields.zipWithIndex.map { case (f, i) => new Parameter("field"+i, f.tt.tpe, false) }, index, tpe.qname)
     }
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
-    def cgExpr(expr: Expr, firstVoidLine: Boolean = false)(implicit ret: Boolean, module: String): Code = {
-      val oneLiner = firstVoidLine && !ret && (expr match {
+    def cgExpr(expr: Expr, firstVoidLine: Boolean = false)(implicit ret: Boolean): Code = {
+      val oneLiner = firstVoidLine && (expr match {
         case Sequence(_, _) => false
         case Match(_, _) => false
         case Error(_) => false
@@ -86,7 +86,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       })
       if (oneLiner) {
         expr match {
-          case Ite(cond, thenn, elze) => If(cgExpr(cond)(false, module)) <:> cgExpr(thenn, true) <:> Else <:> cgExpr(elze, true) <:> End
+          case Ite(cond, thenn, elze) => If(cgExpr(cond)(false)) <:> cgExpr(thenn, true) <:> Else <:> cgExpr(elze, true) <:> End
           case _ => OneLiner(cgExpr(expr))
         }
       } else {
@@ -94,8 +94,8 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
           case retType: RetType =>
             val possibleReturnCode = retType match {
               case binaryOperator: BinaryOperator =>
-                val lhs = cgExpr(binaryOperator.lhs)(false, module)
-                val rhs = cgExpr(binaryOperator.rhs)(false, module)
+                val lhs = cgExpr(binaryOperator.lhs)(false)
+                val rhs = cgExpr(binaryOperator.rhs)(false)
                 binaryOperator match {
                   //infix instructions
                   case Plus(_, _) =>
@@ -122,7 +122,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                     Call(concatImpl.name, List(lhs, rhs))
                 }
               case unaryOperator: UnaryOperator =>
-                val e = cgExpr(unaryOperator.e)(false, module)
+                val e = cgExpr(unaryOperator.e)(false)
                 unaryOperator match {
                   case AmyNot(_) => Not(e)
                   case AmyNeg(_) => Neg(e)
@@ -141,9 +141,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                 if (table.getFunction(qname).isDefined) {
                   //function call
                   val fun = table.getFunction(qname).get
-                  Call(fullName(fun.owner, qname), args.map(cgExpr(_)(false, module)))
+                  Call(fullName(fun.owner, qname), args.map(cgExpr(_)(false)))
                 } else {
-                  Call(qname.name + "_Constructor", args.map(cgExpr(_)(false, module)))
+                  Call(qname.name + "_Constructor", args.map(cgExpr(_)(false)))
                 }
             }
             if (ret) {
@@ -153,9 +153,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
             }
 
           case Sequence(e1: Expr, e2: Expr) =>
-            Seq(cgExpr(e1)(false, module)) <:> cgExpr(e2, firstVoidLine)
+            Seq(cgExpr(e1)(false)) <:> cgExpr(e2, firstVoidLine)
           case Let(df, value: Expr, body: Expr) =>
-            val valueCode = cgExpr(value)(false, module)
+            val valueCode = cgExpr(value)(false)
             valueCode.instructions.head match {
               case Call(name, _, _) if (name.endsWith("Constructor")) =>
                 SetLocal(df.name.name, df.tt.tpe, valueCode) <:> cgExpr(body)
@@ -163,7 +163,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                 SetLocal(df.name, df.tt.tpe, valueCode) <:> cgExpr(body)
             }
           case Ite(cond: Expr, thenn: Expr, elze: Expr) =>
-            If(cgExpr(cond)(false, module)) <:> cgExpr(thenn) <:> Else <:> cgExpr(elze) <:> End
+            If(cgExpr(cond)(false)) <:> cgExpr(thenn) <:> Else <:> cgExpr(elze) <:> End
           case Match(scrut: Expr, cases: List[MatchCase]) => {
 
             def matchAndBind(p: Pattern, tpe: CType = CVoid)(implicit matchingCode: Code): (Code, List[Code], List[String]) = p match {
@@ -175,7 +175,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                 else
                   (True, List(SetLocal(name, tpe, matchingCode)), List())
               case LiteralPattern(lit) =>
-                (Eq(matchingCode, cgExpr(lit)(false, module)), List(), List())
+                (Eq(matchingCode, cgExpr(lit)(false)), List(), List())
               case CaseClassPattern(con, args) => //matchingCode
                 val c = table.getConstructor(con).get
                 val params: List[(Code, List[Code], List[String])] = args.zipWithIndex.zip(c.argTypes).map(pa => matchAndBind(pa._1._1, pa._2)(GetProperty(Call("instance_"+con.name.toLowerCase, List(matchingCode)), GetLocal("field"+pa._1._2))))
@@ -184,7 +184,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                 (And(Eq(GetProperty(matchingCode, GetLocal("caseClass")), Const(c.index)), paramsConditions), eBody, params.flatMap(_._3))
             }
 
-            val scrutCode = cgExpr(scrut)(false, module)
+            val scrutCode = cgExpr(scrut)(false)
             val matchCode: List[Code] = (cases.zipWithIndex).map(c => {
               val (cond, body, toUndef) = matchAndBind(c._1.pat)(scrutCode)
               val undefs: Code = if(toUndef.size > 0) toUndef.map(c => i2c(Undefine(c))).reduceLeft(_ <:> _) else List[Code]()
@@ -198,7 +198,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
               Call("exit", List(GetLocal("EXIT_FAILURE")), true) <:>End
           }
           case Error(msg: Expr) =>
-            Call("perror", List(cgExpr(msg)(false, module)), true) <:>
+            Call("perror", List(cgExpr(msg)(false)), true) <:>
               Call("exit", List(GetLocal("EXIT_FAILURE")), true)
         }
       }
