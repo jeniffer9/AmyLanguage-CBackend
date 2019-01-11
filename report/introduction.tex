@@ -5,3 +5,10 @@ your extension.
 This section should convince us that you have a clear picture of the general
 architecture of your compiler and that you understand how your extension fits
 in it.
+
+In the first part of the project we created an interpreter, a lexer, a parser, a name analyzer and a type checker for the amy language.
+After the stage of the type checker we have basically checked that we only call declared and accessible variables and functions, that we have no duplicates, that we only assign valid types to each other and that there are no forbidden operations like division by 0 in our code. Also the order of the natural left association and lazy evaluation should be taken care of, so the only thing missing was a generator.
+At the last stage of the until now implemented compiler we have defined a code generator which translates Amy code and produces WebAssembly output.
+
+One can imagine that the generated WebAssembly files are not perfectly readable and even less understandable for the human eye. It was also quite a challenge to reason about the postfix language and actually implement the code generation, especially the pattern matching.
+The C language, which is considered as the next more advanced language on top of the Assembly language would be much more human friendly.
