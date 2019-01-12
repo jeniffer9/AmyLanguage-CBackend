@@ -56,10 +56,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       //StructType(owner +"_"+ fd.retType.tpe) else fd.retType.tpe
 
       Function(name, fd.params.map(f => new Parameter(f.name, f.tt.tpe, false)), fd.retType.tpe) {
-        val body = cgExpr(fd.body, fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType))
+        val body = cgExpr(fd.body, isMain || fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType))
         if (isMain) {
-          val (front, last) = body.instructions.splitAt(body.instructions.size-1)
-          front <:> Seq(last) <:> Return(Const(0))
+          body <:> Return(Const(0))
         } else {
           body
         }
@@ -77,19 +76,12 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
     }
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
-    def cgExpr(expr: Expr, firstVoidLine: Boolean = false)(implicit ret: Boolean): Code = {
-      val oneLiner = firstVoidLine && !ret && (expr match {
-        case Sequence(_, _) => false
-        case Match(_, _) => false
+    def cgExpr(expr: Expr, endLine: Boolean = false)(implicit ret: Boolean): Code = {
+      val oneLiner = endLine && (expr match {
         case Error(_) => false
+        case Let(_, _, _) => false
         case _ => true
       })
-      if (oneLiner) {
-        expr match {
-          case Ite(cond, thenn, elze) => If(cgExpr(cond)(false)) <:> cgExpr(thenn, true) <:> Else <:> cgExpr(elze, true) <:> End
-          case _ => OneLiner(cgExpr(expr))
-        }
-      } else {
         expr match {
           case retType: RetType =>
             val possibleReturnCode = retType match {
@@ -148,12 +140,13 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
             }
             if (ret) {
               Return(possibleReturnCode)
+            } else if(oneLiner){
+              OneLiner(possibleReturnCode)
             } else {
               possibleReturnCode
             }
-
           case Sequence(e1: Expr, e2: Expr) =>
-            Seq(cgExpr(e1)(false)) <:> cgExpr(e2, firstVoidLine)
+            Seq(cgExpr(e1)(false)) <:> cgExpr(e2, endLine)
           case Let(df, value: Expr, body: Expr) =>
             val valueCode = cgExpr(value)(false)
             valueCode.instructions.head match {
@@ -163,7 +156,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
                 SetLocal(df.name, df.tt.tpe, valueCode) <:> cgExpr(body)
             }
           case Ite(cond: Expr, thenn: Expr, elze: Expr) =>
-            If(cgExpr(cond)(false)) <:> cgExpr(thenn) <:> Else <:> cgExpr(elze) <:> End
+            If(cgExpr(cond)(false)) <:> cgExpr(thenn, !ret) <:> Else <:> cgExpr(elze, !ret) <:> End
           case Match(scrut: Expr, cases: List[MatchCase]) => {
 
             def matchAndBind(p: Pattern, tpe: CType = CVoid)(implicit matchingCode: Code): (Code, List[Code], List[String]) = p match {
@@ -189,10 +182,9 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
               val (cond, body, toUndef) = matchAndBind(c._1.pat)(scrutCode)
               val undefs: Code = if(toUndef.size > 0) toUndef.map(c => i2c(Undefine(c))).reduceLeft(_ <:> _) else List[Code]()
               if (c._2 == 0)
-                If(cond) <:> body <:> cgExpr(c._1.expr, true) <:> undefs
+                If(cond) <:> body <:> cgExpr(c._1.expr, !ret) <:> undefs
               else
-                ElsIf(cond) <:> body <:> cgExpr(c._1.expr, true) <:> undefs
-                //i2c(Case(cond, body <:> cgExpr(c.expr)))
+                ElsIf(cond) <:> body <:> cgExpr(c._1.expr, !ret) <:> undefs
             })
             matchCode.reduceLeft(_ <:> _) <:> Else <:> Call("perror", List("match error"), true) <:>
               Call("exit", List(GetLocal("EXIT_FAILURE")), true) <:>End
@@ -200,7 +192,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
           case Error(msg: Expr) =>
             Call("perror", List(cgExpr(msg)(false)), true) <:>
               Call("exit", List(GetLocal("EXIT_FAILURE")), true)
-        }
+
       }
     }
 
