@@ -58,8 +58,8 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
       Function(name, fd.params.map(f => new Parameter(f.name, f.tt.tpe, false)), fd.retType.tpe) {
         val body = cgExpr(fd.body, fd.retType.tpe == UnitType)(ret = !(isMain || fd.retType.tpe == UnitType))
         if (isMain) {
-          body <:>
-            Return(Const(0))
+          val (front, last) = body.instructions.splitAt(body.instructions.size-1)
+          front <:> Seq(last) <:> Return(Const(0))
         } else {
           body
         }
@@ -78,7 +78,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
     // Generate code for an expression expr.
     // Additional argument ret indicates a return is expected from the expression
     def cgExpr(expr: Expr, firstVoidLine: Boolean = false)(implicit ret: Boolean): Code = {
-      val oneLiner = firstVoidLine && (expr match {
+      val oneLiner = firstVoidLine && !ret && (expr match {
         case Sequence(_, _) => false
         case Match(_, _) => false
         case Error(_) => false
