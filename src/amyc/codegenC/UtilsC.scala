@@ -118,11 +118,11 @@ object UtilsC {
 
   val readStringImpl: Function = {
     val local1 = "string"
-
     Function("Std_readString", List(), CStringType) {
       SetLocal(local1, CStringType, AllocateMem(Const(4096))) <:>
         Call("fgets", List(GetLocal(local1), Const(4096), GetLocal("stdin")), true) <:>
-        Return(GetLocal(local1))
+        Call("scanf", List("%*[^\\n]%*c"), true) <:> //discard up to and including the next '\n' character
+      Return(GetLocal(local1))
     }
   }
 
