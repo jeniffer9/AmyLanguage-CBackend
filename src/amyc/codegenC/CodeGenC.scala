@@ -146,7 +146,7 @@ object CodeGenC extends Pipeline[(Program, SymbolTable), Module] {
               possibleReturnCode
             }
           case Sequence(e1: Expr, e2: Expr) =>
-            Seq(cgExpr(e1)(false)) <:> cgExpr(e2, endLine)
+            Seq(cgExpr(e1)(false)) <:> cgExpr(e2, !ret)
           case Let(df, value: Expr, body: Expr) =>
             val valueCode = cgExpr(value)(false)
             valueCode.instructions.head match {
