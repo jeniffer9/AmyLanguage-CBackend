@@ -5,7 +5,13 @@ If you are using theoretical concepts, explain them first in this subsection.
 Even if they come from the course (eg. lattices), try to explain the essential
 points \emph{in your own words}. Cite any reference work you used like this
 \cite{TigerBook}. This should convince us that you know the theory behind what
-you coded. 
+you coded.
+
+For the pattern matching we went on with the matchAndBinding function approach which returns a boolean and the new defined locals for and individual case, as we have seen in the course.
+With the boolean we evaluate, if the specific case is the one we should truly be matching on.
+The condition also includes the parameters. So basically for a wildcard and an id pattern it is always true.
+For the id pattern, the id is then additionally added to the list of locals, associating the expression that is being matched on with the this newly defined id.
+For the Case Classes we check that it's the same Class for the given type and the the literals we match directly on the matching expression.
 
 \subsection{Implementation Details}
 %Describe all non-obvious tricks you used. Tell us what you thought was hard and
@@ -18,6 +24,62 @@ you coded.
 %After reading this section, we should be convinced that you knew what you were
 %doing when you wrote your extension, and that you put some extra consideration
 %for the harder parts.
+In a separate package called "c" we basically define all the elements that were also defined in the webAssembly code generation; Function, Instructions, Module and ModulePrinter.
+Additionally we added an AbstractClass and a CaseClass, inspired from the Function file and that are used to correctly implement an alternative to types and classes in C.
+
+AbstractClass: (takes the typeName as parameter)
+The abstract class implements the equivalent to a type by creating a struct with the defined type name, typedefing it to
+it's "abstract name" - which consists simply by adding "Abstract_" in front of it - and then simutaneously creating a pointer
+which is being used whenever make use of the type.
+
+CaseClass: (takes: name, list of it's fields, case index, type)
+We are here making use of the individual index assigned to each constructor for each type
+
 The hardest part was finding a working and readable substitution for Amy's abstract and case class (which extend the abstract class) functionality.
 How can we have "generics" and "inheritance" in C: that seemed like an impossible challenge.
-So we contemplated on how to achieve this and sat down and tried to come up with ways 
+Basicaly, every time we call a constructor, the C code calls the associated constructor which does all the work for us and
+just returns the right type struct containing a pointer to aninstance of the actual CaseClass and a caseClass field containing
+the index which will be very useful when implementing the pattern matching.
+
+Parameter: (takes: name, type)
+Is being used for declaring a function's and a constructor's parameters
+
+Instructions:
+In the instructions class, we added an Infix and a Prefix trait which both extend Instruction and are extended by all the
+logical/numerical instructions for making some code a bit more generic and avoid exhaustive code repetition.
+Furthermore we added C language Instructions as for example one that allows us to easily allocate memory space ("AllocateMem")
+or Set/GetProperty to easily use the arrow notation when working with pointers.
+
+The Module file has been drastically shortened since it doesn't need an extra html file anymore nor a jsWrapper.
+
+On the other side, the ModulePrinter has become a lot more complex, since the formatting for the C language is way more
+complicated than a 'one line for each instruction' WebAssembly format.
+We made sure that in the beginning of the module printer all the function declarations are printed, such that we can call
+on functions before we implement them.
+The stdio, stdlib, string and stdbool header files are also included in every module such that builtin functions like scanf
+and printf and also the bool types can be easily used in the code generation.
+
+Another newly created package is the codeGenC which is the equivalent to the codeGen from the WebAssembly implementation
+and in which lies the heart of the generated logic.
+
+UtilsC
+In this file we created a trait "CType" which translates types from the TreeModule to CTypes. This is needed because for
+C every variable declaration, every function parameter and every Function has a type or return type.
+Also the builtinFunctions and the default includes are declared in there. In the end you can find some implicit functions
+which makes the coding implementation a bit more comfortable.
+
+The CodePrinterC defines that the generated modules should be saved in a file called "cout" and of all the files
+should be carrying the file extension '.c'
+
+CodeGenC
+Most of this file is translating the Amy logic into C Instructions logic that can be used to correctly print C code in the
+ModulePrinter. The main difference is that the types, the Constructors and the Functions are all evaluated differently
+instead of all together by at the same time taking cate of the correct C syntax.
+
+The PatternMatching was by far the hardest challenge. Next to returning a boolean if the actual case actually matches
+we also return code which is evaluated before the actual caseExpression to declare the added new local varaibles.
+If the pattern is an IdPattern we may face the situation where we don't know about the type of the new local,
+so we cam up with the solution to create a define statement which creates a macro in C and set it equal to the current
+expression which is being matched. Thus we can just call the name of the local which is then evaluated
+to the correct expression. At the end of the case buddy we undefine the defined macros again in order to not run into any
+naming conflicts.
